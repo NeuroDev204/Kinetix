@@ -7,6 +7,7 @@ const ANSWERS = {
   meal: { coach_contract: 1, items: [{ name: 'Fixture rice', grams: 200, kcal: 260, protein: 5, carbs: 57, fat: 1 }] },
   physique: { coach_contract: 1, physique: { bodyFatRange: [12, 16], notes: 'Fake estimate for the E2E run.', focusAreas: ['core'] } },
   review: { coach_contract: 1, summary: 'Eat a little less and keep training.', evidence: { from: null, to: null, sessions: 0 }, changes: [], nutrition: { kcal: 1850, protein: 130, carbs: 200, fat: 55, why: 'Weight is flat over the fortnight.', mealPlan: [{ day: 'Mon', meals: ['oats with berries'] }] } },
+  form: { coach_contract: 1, summary: 'Steady tempo, heels lifted at the bottom.', issues: [{ rep: 3, issue: 'Heels lifted.', cue: 'Keep weight through the heels.' }], score: 6 },
   create: { coach_contract: 1, ok: true },
 }
 

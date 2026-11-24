@@ -13,3 +13,9 @@ The voice session needs native begin and end calls (`beginVoice` / `endVoice`) i
 Decision needed: (a) let the voice turn go through CueAudioLedger as a new shape, which changes CueAudioCore and the test, or (b) relax the rule for the voice turn and say why. Until then the session runs without the native calls: beginVoiceTurn falls back to { input: 'builtin' } and the speaker and mic use the default session.
 
 ## 3.5 (Swift) — see the entry above; JS side in voice-session.js is done and tested.
+
+## 4.5 (partial): form analysis during a live workout
+
+A set video cannot be analysed while the workout is still running. The in-progress session (`active`) never syncs, and the server accepts a media upload only for hashes that a saved state references (api/media.js referencedHashes). So the clip is not on the server when the form job asks for it: `checkForm` answers 'offline' until the workout is saved.
+
+Decision needed: (a) let the server accept a set video for the live session (changes the media access rule; security-sensitive, so not done here), or (b) keep it and analyse after the workout is saved. Until then the E2E flow 6 asserts the 'offline' outcome, and flow 7 (offline sync of two logged sets) is not written: it needs the workout screen to log sets.
