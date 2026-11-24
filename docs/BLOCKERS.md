@@ -25,3 +25,9 @@ Decision needed: (a) let the server accept a set video for the live session (cha
 `gh workflow run ios-ipa.yml --ref kinetix/p5-ios` returns 404: GitHub dispatches a workflow only when the file is on the default branch. Verifying the IPA and the simulator job needs Phase 5 merged to `main` first (a fast-forward merge, which is a shared-branch action).
 
 Decision needed: merge kinetix/p5-ios to main now so the workflows can run, or keep the branch until 5.4. The workflow files are committed on kinetix/p5-ios (ios-ipa.yml new; ios.yml trimmed: no watch, widget or Garmin steps; device-archive job moved out).
+
+## 5.1 side effect: 18 Live Widget Settings tests are skipped (decision needed)
+
+Task 5.1 turns the iOS Live Activity off in JavaScript (a free team cannot sign the widget). The Settings tests in frontend/src/components/LiveWidgetTry.test.jsx assumed the iOS plugin and failed, so 18 of 27 are now `it.skip` with that reason. The 9 Android cases still run.
+
+Decision needed: keep the iOS Live Activity off (then delete these skipped cases and the iOS branches they test), or turn it back on once the app is on a paid team and the widget target is signed (then restore the JS gate and these cases).

@@ -81,7 +81,7 @@ describe('which surfaces a phone previews', () => {
     expect(ids(null, null).includes('app')).toBe(false)
     expect(surfacesFor(null, null, true).map(x => x.id)).toContain('app')
   })
-  it('the page asks the plugin and shows the island tab when it says so', async () => {
+  it.skip('the page asks the plugin and shows the island tab when it says so', async () => {
     mocks.status = { supported: true, island: true }
     await render(<LiveWidgetSettings />)
     await settle()
@@ -89,7 +89,7 @@ describe('which surfaces a phone previews', () => {
     expect(host.querySelector('.gl-surface').getAttribute('aria-labelledby')).toBeTruthy()
     expect(document.getElementById(host.querySelector('.gl-surface').getAttribute('aria-labelledby')).textContent).toBe('Preview on')
   })
-  it('no island: no tab at all, the Lock Screen is the preview', async () => {
+  it.skip('no island: no tab at all, the Lock Screen is the preview', async () => {
     await render(<LiveWidgetSettings />)
     await settle()
     expect(host.querySelector('.gl-surface')).toBeNull()
@@ -107,7 +107,7 @@ describe('which surfaces a phone previews', () => {
 })
 
 describe('the status card', () => {
-  it('healthy: the master switch, on, and the test row; no warning, no footer, no lede', async () => {
+  it.skip('healthy: the master switch, on, and the test row; no warning, no footer, no lede', async () => {
     await render(<LiveWidgetSettings />)
     await settle()
     const card = host.querySelector('.gl-status')
@@ -118,7 +118,7 @@ describe('the status card', () => {
     // The card comes first on the page.
     expect(host.querySelector('.gl-settings').firstElementChild).toBe(card)
   })
-  it('before the phone answered: both rows are there already and inert, so nothing jumps', async () => {
+  it.skip('before the phone answered: both rows are there already and inert, so nothing jumps', async () => {
     let answer
     mocks.statusP = new Promise(r => { answer = r })
     await render(<LiveWidgetSettings />)
@@ -130,7 +130,7 @@ describe('the status card', () => {
     expect(master().disabled).toBe(false)
     expect(host.querySelector('.gl-try').tagName).toBe('BUTTON')
   })
-  it('Live Activities off: a warning row that opens the app’s settings, and no test row', async () => {
+  it.skip('Live Activities off: a warning row that opens the app’s settings, and no test row', async () => {
     mocks.status = { supported: false, island: true }
     await render(<LiveWidgetSettings />)
     await settle()
@@ -142,7 +142,7 @@ describe('the status card', () => {
     await click(warn)
     expect(mocks.opened).toBe(1)
   })
-  it('asks again when the app comes back from the system’s settings', async () => {
+  it.skip('asks again when the app comes back from the system’s settings', async () => {
     mocks.status = { supported: false, island: false }
     await render(<LiveWidgetSettings />)
     await settle()
@@ -153,7 +153,7 @@ describe('the status card', () => {
     expect(host.querySelector('.gl-warn')).toBeNull()
     expect(host.querySelector('.gl-try')).toBeTruthy()
   })
-  it('an iPhone below iOS 17: says so, with no switch, no test and nothing to tap', async () => {
+  it.skip('an iPhone below iOS 17: says so, with no switch, no test and nothing to tap', async () => {
     setUA(IOS16)
     mocks.status = { supported: false, island: false }
     await render(<LiveWidgetSettings />)
@@ -188,7 +188,7 @@ describe('the status card', () => {
 })
 
 describe('off on this phone', () => {
-  it('the master switch is a fact about this phone: localStorage, never S', async () => {
+  it.skip('the master switch is a fact about this phone: localStorage, never S', async () => {
     await render(<LiveWidgetSettings />)
     await settle()
     const before = JSON.stringify(mocks.S)
@@ -207,7 +207,7 @@ describe('off on this phone', () => {
     expect(host.querySelector('.gl-stage').classList.contains('off')).toBe(false)
     expect(host.querySelector('.gl-try')).toBeTruthy()
   })
-  it('remembers it on the next visit, and ends a test that was running', async () => {
+  it.skip('remembers it on the next visit, and ends a test that was running', async () => {
     await render(<LiveWidgetSettings />)
     await settle()
     await click(host.querySelector('.gl-try'))
@@ -246,7 +246,7 @@ describe('Try it', () => {
   const row = () => host.querySelector('.gl-try')
   const title = () => row().querySelector('.lrow-t').textContent
   const hint = () => host.querySelector('.gl-try-hint').textContent
-  it('is a row: shows the sample as a preview activity, with the hint, and Stop ends it', async () => {
+  it.skip('is a row: shows the sample as a preview activity, with the hint, and Stop ends it', async () => {
     await render(<LiveWidgetSettings />)
     await settle()
     expect(row().classList.contains('lrow')).toBe(true)
@@ -267,7 +267,7 @@ describe('Try it', () => {
     expect(mocks.calls.at(-1)).toEqual(['end'])
     expect(title()).toBe('Try it on this phone')
   })
-  it('an iPhone with a Dynamic Island: swipe home, since iOS keeps an app’s own activity out of it while the app is in front', async () => {
+  it.skip('an iPhone with a Dynamic Island: swipe home, since iOS keeps an app’s own activity out of it while the app is in front', async () => {
     mocks.status = { supported: true, island: true }
     await render(<LiveWidgetSettings />)
     await settle()
@@ -282,7 +282,7 @@ describe('Try it', () => {
     await settle()
     expect(hint()).toBe('Pull down from the top to see it with your notifications.')
   })
-  it('follows the moment picked while it runs', async () => {
+  it.skip('follows the moment picked while it runs', async () => {
     await render(<LiveWidgetSettings />)
     await settle()
     await click(row())
@@ -292,7 +292,7 @@ describe('Try it', () => {
     const last = mocks.calls.filter(c => c[0] === 'update').at(-1)
     expect(JSON.parse(last[1].state).restEndsAt).toBeGreaterThan(Date.now())
   })
-  it('never over a running workout: the same title, not tappable, with the reason', async () => {
+  it.skip('never over a running workout: the same title, not tappable, with the reason', async () => {
     mocks.S.active = { id: 'w1', start: Date.now(), cur: 0, entries: [{ id: '0025', sets: [{ w: 80, r: 8 }] }] }
     await render(<LiveWidgetSettings />)
     await settle()
@@ -301,7 +301,7 @@ describe('Try it', () => {
     expect(hint()).toMatch(/Not while a workout is running/)
     expect(await LA.tryLive({ attributes: {}, state: {} }, mocks.S)).toBe(false)
   })
-  it('the phone answers that it showed nothing: back to idle, says so, and asks the phone again', async () => {
+  it.skip('the phone answers that it showed nothing: back to idle, says so, and asks the phone again', async () => {
     mocks.shown = false
     await render(<LiveWidgetSettings />)
     await settle()
@@ -318,7 +318,7 @@ describe('Try it', () => {
     await settle()
     expect(title()).toBe('Stop')
   })
-  it('ends by itself after two minutes, and on leaving the page', async () => {
+  it.skip('ends by itself after two minutes, and on leaving the page', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true })
     await render(<LiveWidgetSettings />)
     await settle()
@@ -358,7 +358,7 @@ describe('what a phone leaves out', () => {
     expect(host.querySelector('.sect:last-child .sect-f').textContent).toMatch(/Live Update/)
     expect([...host.querySelectorAll('.sect-f')].map(x => x.textContent)).toContain('Adds a progress bar and up to four extras.')
   })
-  it('iPhone: +15 s is there, and the note under the last card is the iOS one', async () => {
+  it.skip('iPhone: +15 s is there, and the note under the last card is the iOS one', async () => {
     await render(<LiveWidgetSettings />)
     await settle()
     expect(titles()).toContain('+15 s on rests')
@@ -382,7 +382,7 @@ describe('Not showing up?', () => {
   }
   afterEach(async () => { if (boxRoot) await act(async () => boxRoot.unmount()); box?.remove(); box = boxRoot = null })
 
-  it('iPhone with an island: four reasons, the first with the phone’s own answer and a way to the setting', async () => {
+  it.skip('iPhone with an island: four reasons, the first with the phone’s own answer and a way to the setting', async () => {
     mocks.status = { supported: true, island: true }
     await render(<LiveWidgetSettings />)
     await settle()
@@ -399,7 +399,7 @@ describe('Not showing up?', () => {
     await click([...box.querySelectorAll('.btn')].find(b => b.textContent === 'Done'))
     expect(closed).toHaveBeenCalled()
   })
-  it('iPhone without an island: no “Leave the app”; Live Activities off reads Off', async () => {
+  it.skip('iPhone without an island: no “Leave the app”; Live Activities off reads Off', async () => {
     mocks.status = { supported: false, island: false }
     await render(<LiveWidgetSettings />)
     await settle()
