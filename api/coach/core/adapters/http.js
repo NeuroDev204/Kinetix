@@ -347,7 +347,7 @@ export function httpAdapter(spec) {
       const streamKey = () => `${id} ${base} ${chosen}`;
       let useStream = !!spec.stream && opts.stream !== false && !noStream.has(streamKey());
       const build = () => {
-        const b = spec.body({ model: chosen, prompt, system: system || null, schema: schema || null, maxTokens, base, ...(opts.web ? { web: true } : {}) });
+        const b = spec.body({ model: chosen, prompt, system: system || null, schema: schema || null, maxTokens, base, ...(opts.web ? { web: true } : {}), ...(opts.media ? { media: opts.media } : {}) });
         return useStream ? spec.stream.body(b) : b;
       };
       // Drops the stream for this endpoint and model, remembered; true when that changed anything.

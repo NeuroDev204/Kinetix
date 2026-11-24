@@ -72,11 +72,12 @@ export const geminiSpec = {
   // type and the validator instead of a guaranteed 400.
   // Web research is Grounding with Google Search. Older models refuse a JSON mime type next to a
   // tool, so a grounded request asks for JSON in the prompt alone and the parser and validator judge it.
-  body: ({ prompt, system, schema, maxTokens, web }) => {
+  body: ({ prompt, system, schema, maxTokens, web, media }) => {
     const responseSchema = schema && !web ? geminiSchema(schema) : null;
     return {
       systemInstruction: { parts: [{ text: system ? SYSTEM_PROMPT + '\n\n' + system : SYSTEM_PROMPT }] },
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      // Photos and videos the person chose to have analysed travel as inline parts after the text.
+      contents: [{ role: 'user', parts: [{ text: prompt }, ...(media || []).map(m => ({ inlineData: { mimeType: m.mimeType, data: m.data } }))] }],
       ...(web ? { tools: [{ google_search: {} }] } : {}),
       generationConfig: {
         ...(web ? {} : { responseMimeType: 'application/json' }),

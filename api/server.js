@@ -3637,6 +3637,7 @@ const routes = {
 coachJobs.recoverOnBoot();
 // A ready proposal is the one Coach event worth a notification. Failures and "nothing to
 // change" stay silent on purpose (FR-38/E4).
+coachJobs.setMediaFile((uid, hash) => MEDIA.file(uid, hash));
 coachJobs.setProposalHook((uid, pending) => {
   const n = (pending?.changes || []).length;
   if (!n) return;

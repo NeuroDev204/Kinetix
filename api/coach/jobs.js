@@ -21,6 +21,7 @@ import { adapterFor } from './adapters/index.js';
 import * as payloadLib from './core/payload.js';
 import { runPipeline } from './core/pipeline.js';
 import { providerForJob, fallbackFor } from './core/route.js';
+import { loadMedia } from './media-input.js';
 import { extractJSON } from './core/parse.js';
 import { userMessageFor } from './core/failure.js';
 import { hashPlan } from './core/plan-hash.js';
@@ -347,6 +348,9 @@ function finish(job, result) {
 // importing the web-push plumbing (and dragging it into every test that touches the queue).
 let onProposal = null;
 export function setProposalHook(fn) { onProposal = fn; }
+// Set by server.js: (uid, hash) => the media store's file record, for photos a job was given.
+let mediaFile = null;
+export function setMediaFile(fn) { mediaFile = fn; }
 
 /* ---------- execution ---------- */
 
@@ -405,6 +409,13 @@ async function execute(job) {
     return finish(job, { outcome: 'failed', errorClass: 'toolarge', detail: `payload of ${Math.round(size / 1000)}k characters` });
   }
 
+  // Photos and videos the person chose for this job, read from the media store. A missing or
+  // oversize one fails the job before any provider is called.
+  let media = null;
+  if (job.media) {
+    try { media = await loadMedia(job.uid, [].concat(job.media), { mediaFile }); }
+    catch (e) { return finish(job, { outcome: 'failed', errorClass: e.code === 'media-missing' ? 'media-missing' : 'toolarge', detail: e.code }); }
+  }
   // An HTTPS provider has no child process, so no directory for one to live in either.
   const jobDir = adapter.spawns === false ? null : fs.mkdtempSync(path.join(os.tmpdir(), 'coach-'));
   const ctl = new AbortController();
@@ -425,7 +436,7 @@ async function execute(job) {
       adapter: a, cfg, kind: job.kind, payload, model: cfgStore.modelFor(cfg, provider), timeoutMs,
       // The HTTP adapters take the fetch and the abort signal they are given; the runtime
       // adapters ignore both.
-      invokeOpts: { jobDir, env, fetch: fetchFor(TIMEOUT_MS), signal: ctl.signal, maxTokens: cfg.maxOutputTokens, ...(useWeb ? { web: true } : {}) }
+      invokeOpts: { jobDir, env, fetch: fetchFor(TIMEOUT_MS), signal: ctl.signal, maxTokens: cfg.maxOutputTokens, ...(useWeb ? { web: true } : {}), ...(media ? { media } : {}) }
     });
   };
   try {
