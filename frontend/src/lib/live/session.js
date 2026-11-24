@@ -13,7 +13,7 @@ export function createLiveSession({
   audio, voice, mintToken,
   now = Date.now, idleMs = 5000,
 }) {
-  let token = null, tokenExp = 0, socketUrl = wsUrl
+  let token = null, tokenExp = 0, socketUrl = wsUrl, modelName = model
   let ws = null, ready = false, readyWaiters = []
   let handle = null, reconnectNext = false, reconnected = false
   let mic = null, turn = null, idle = null, stopped = false
@@ -30,6 +30,7 @@ export function createLiveSession({
       token = r.token
       tokenExp = r.expiresAt
       socketUrl = r.wsUrl || socketUrl
+      modelName = r.model || modelName
     }
   }
 
@@ -39,7 +40,7 @@ export function createLiveSession({
     ready = false
     const sock = wsFactory(`${socketUrl}?access_token=${encodeURIComponent(token)}`)
     ws = sock
-    sock.onopen = () => sock.send(JSON.stringify(buildSetup({ model, systemInstruction, tools, resumeHandle: handle })))
+    sock.onopen = () => sock.send(JSON.stringify(buildSetup({ model: modelName, systemInstruction, tools, resumeHandle: handle })))
     sock.onmessage = e => handle_(JSON.parse(e.data))
     sock.onclose = e => onClosed(e)
     return whenReady()

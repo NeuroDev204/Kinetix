@@ -4357,6 +4357,11 @@ export const PT_BR_OVERRIDES = {
   "kcal": "kcal",
   "Calories and meals": "Calories and meals",
   "{0} kcal a day · protein {1} g · carbs {2} g · fat {3} g": "{0} kcal a day · protein {1} g · carbs {2} g · fat {3} g",
+  "Listening": "Listening",
+  "Talk to your trainer": "Talk to your trainer",
+  "Trainer unavailable": "Trainer unavailable",
+  "Your trainer is talking": "Your trainer is talking",
+  "Live trainer limit reached, try later": "Live trainer limit reached, try later",
 }
 
 export default { ...pt, ...PT_BR_OVERRIDES }

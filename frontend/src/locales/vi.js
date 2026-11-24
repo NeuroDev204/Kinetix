@@ -5894,4 +5894,9 @@ export default {
   "kcal": "kcal",
   "Calories and meals": "Calo và bữa ăn",
   "{0} kcal a day · protein {1} g · carbs {2} g · fat {3} g": "{0} kcal mỗi ngày · chất đạm {1} g · tinh bột {2} g · chất béo {3} g",
+  "Listening": "Đang nghe",
+  "Talk to your trainer": "Nói chuyện với huấn luyện viên",
+  "Trainer unavailable": "Huấn luyện viên không khả dụng",
+  "Your trainer is talking": "Huấn luyện viên đang nói",
+  "Live trainer limit reached, try later": "Đã hết hạn mức huấn luyện viên trực tiếp, thử lại sau",
 };

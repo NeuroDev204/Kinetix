@@ -67,6 +67,10 @@ import { markAllSetsDone, sessionHistory } from '../lib/backfill.js'
 import { bindWatchActions, markDiscarded, watchTickRest, applyRestStep, restAtFor, setStamp } from '../lib/watch-sync.js'
 import { bestSetFor } from '../lib/exercise-history.js'
 import { bindLiveActions } from '../lib/live-activity.js'
+import { bindVoiceActions, logNextSet } from '../lib/live/tools.js'
+import { useLiveTrainer, liveTrainer } from '../lib/live/voice.js'
+import { speakNative } from '../lib/rest-alert.js'
+import TalkButton from '../components/TalkButton.jsx'
 import { bindWidgetActions } from '../lib/widget-logger.js'
 import { isWarmupRow, isFailureSet, toggleFailure, isDropSet, isRestPauseSet, isClusterSet, dropsOf, clustersOf, addDrop, addCluster, removeDropAt, removeClusterAt, setDropAt, setClusterAt, nextDropWeight, nextBurstReps, isSideSet, makeSideSet, setSideField, toggleSide, addSideDrop, removeSideDropAt, setSideDropAt, addSideCluster, removeSideClusterAt, setSideClusterAt, WEIGHT_ORIGIN_MANUAL, markWarmupEdited } from '../lib/workout-model.js'
 import { canMoveActiveWorkoutUnit, moveActiveWorkoutUnit, canMoveActiveWorkoutEntry, moveActiveWorkoutEntry } from '../lib/active-workout-order.js'
@@ -2506,6 +2510,26 @@ function ActiveWorkout() {
       if (at) mutEntry(idx, en => { const set = en.sets[i]; if (set?.done) set.at = at })
     },
   }), [])
+  // Kinetix: the live trainer's tools act on this workout (lib/live/tools.js).
+  const talk = useLiveTrainer()
+  useEffect(() => bindVoiceActions({
+    logSet: args => {
+      const A = useStore.getState().S.active
+      const hit = logNextSet(A?.entries, args)
+      if (!hit.ok) return hit
+      const weight = hit.weight, reps = hit.reps
+      mutEntry(hit.idx, en => { const set = en.sets[hit.i]; if (set) { if (weight != null) set.w = weight; if (reps != null) set.r = reps } })
+      tickRowRef.current(hit.idx, hit.i)
+      return { ok: true, exercise: hit.exercise, set: hit.set, weight, reps }
+    },
+    startRest: sec => useUI.getState().startRest(sec, null, { kind: 'trainer' }),
+    nextExercise: () => navigateUnit(1),
+    today: () => {
+      const A = useStore.getState().S.active
+      const entries = (A?.entries || []).map(e => ({ name: e.name || e.id, done: (e.sets || []).filter(x => x?.done).length, total: (e.sets || []).length }))
+      return { ok: true, entries }
+    },
+  }), [])
   useEffect(() => bindLiveActions({
     setDone: (idx, i, { at }) => {
       const A = useStore.getState().S.active
@@ -2877,6 +2901,8 @@ function ActiveWorkout() {
       <Button icon="chevronLeft" disabled={unitIdx <= 0} onClick={() => navigateUnit(-1)}>{t('Prev')}</Button>
       <Button trailingIcon="chevronRight" disabled={unitIdx < 0 || unitIdx >= units.length - 1} onClick={() => navigateUnit(1)}>{t('Next')}</Button>
     </div>}
+    {!listMode && <TalkButton state={talk.state} why={talk.why} speak={speakNative}
+      onTalk={() => { const v = liveTrainer({ todaySummary: '', unit: S.unit }); v.startTurn() }} />}
     {!listMode && <div style={{ height: 10 }} />}
     {wc.exerciseButtons && listMode && A.entries.length > 0 && <div className="muted small" style={{ marginBottom: 6 }}>{t('Move, swap and remove below act on the exercise marked {0}.', t('Current'))}</div>}
     {/* The end of the workout (redesign 1.4.5, P3): adding an exercise and the session's note are
