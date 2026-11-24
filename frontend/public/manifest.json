@@ -1,6 +1,6 @@
 {
-  "name": "openGym",
-  "short_name": "openGym",
+  "name": "Kinetix",
+  "short_name": "Kinetix",
   "description": "Personal gym & body weight tracker",
   "start_url": "./",
   "scope": "./",

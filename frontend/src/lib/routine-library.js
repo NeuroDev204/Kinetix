@@ -2,7 +2,7 @@
 // the built-in starter plans plus the community index at a configurable address (the instance's
 // `coach.routinesUrl`, else opengym.ch), fetched by the app, cached for a day, and simply absent
 // when it cannot be read. A question to the Coach carries the few entries that match it.
-import { builtinIndex, normalizeIndex, searchRoutines, compactEntry, entryToBundle, DEFAULT_INDEX_URL } from '../../../api/coach/core/routine-library.js'
+import { builtinIndex, normalizeIndex, searchRoutines, compactEntry, entryToBundle } from '../../../api/coach/core/routine-library.js'
 import { validatePlan } from '../../../api/coach/core/validate.js'
 import { nativeFetch } from './capacitor-fetch.js'
 import { useStore } from '../store/useStore.js'
@@ -11,11 +11,10 @@ const CACHE = 'og_routines_index_v1'
 const TTL_MS = 24 * 3600000
 let memo = null
 
-/** The index address in force: the server's, '' or 'off' for none, else the default. */
+/** The index address in force: an https address the server set, else null (Kinetix ships with no community index). */
 export function indexUrl(config = useStore.getState().config) {
   const set = config?.coach?.routinesUrl
-  if (set === 'off' || set === '') return null
-  return typeof set === 'string' && /^https:\/\//.test(set) ? set : DEFAULT_INDEX_URL
+  return typeof set === 'string' && /^https:\/\//.test(set) ? set : null
 }
 
 const store = () => { try { return globalThis.localStorage || null } catch { return null } }

@@ -40,10 +40,10 @@ describe('the routines library in the app', () => {
     expect(await importBundle('nope', { url: null })).toBeNull()
   })
 
-  it('the instance decides the address, or switches it off', () => {
-    expect(indexUrl({ coach: {} })).toBe('https://opengym.ch/routines/index.json')
+  it('no community index unless the instance sets an https address', () => {
+    expect(indexUrl({ coach: {} })).toBeNull()
     expect(indexUrl({ coach: { routinesUrl: 'https://gym.example/routines.json' } })).toBe('https://gym.example/routines.json')
     expect(indexUrl({ coach: { routinesUrl: 'off' } })).toBeNull()
-    expect(indexUrl({ coach: { routinesUrl: 'http://insecure.example' } })).toBe('https://opengym.ch/routines/index.json')
+    expect(indexUrl({ coach: { routinesUrl: 'http://insecure.example' } })).toBeNull()
   })
 })
