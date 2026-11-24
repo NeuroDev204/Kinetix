@@ -33,10 +33,12 @@ export function kinetixRoutes({ json, readBody, readSession, cfgStore, credentia
       const cfg = cfgStore.load();
       if (!cfg.routing || !cfg.routing.live) return json(res, 503, { error: 'no-live', code: 'no-live' });
       const cred = credentialFor(user.id, cfg.routing.live);
-      if (!cred.ok || !cred.auth) return json(res, 503, { error: 'no-live', code: 'no-live' });
+      // A route with no key on the instance is only valid for the E2E stand-in (KINETIX_FAKE_GENAI).
+      const fake = process.env.KINETIX_FAKE_GENAI === '1';
+      if (!cred.ok || (!cred.auth && !fake)) return json(res, 503, { error: 'no-live', code: 'no-live' });
       try {
         const out = await mintLiveToken({
-          apiKey: cred.auth.token,
+          apiKey: cred.auth ? cred.auth.token : 'fake',
           model: cfg.routing.liveModel,
           genai: process.env.KINETIX_FAKE_GENAI === '1' ? fakeGenai : genai,
         });

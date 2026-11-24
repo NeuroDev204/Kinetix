@@ -24,4 +24,20 @@ function png(w, h, [r, g, b]) {
 fs.mkdirSync(OUT, { recursive: true })
 fs.writeFileSync(path.join(OUT, 'meal.png'), png(64, 64, [210, 150, 80]))
 fs.writeFileSync(path.join(OUT, 'body.png'), png(64, 64, [120, 120, 130]))
-console.log('wrote meal.png and body.png to', OUT)
+
+// speech.wav: 2 s of a 440 Hz tone then 3 s of silence, 16 kHz mono 16-bit. A stand-in for a voice, to feed the mic.
+function wav(seconds, rate = 16000) {
+  const n = Math.round(seconds * rate)
+  const data = Buffer.alloc(n * 2)
+  for (let i = 0; i < n; i++) {
+    const tone = i < 2 * rate ? Math.round(0.3 * 32767 * Math.sin(2 * Math.PI * 440 * i / rate)) : 0
+    data.writeInt16LE(tone, i * 2)
+  }
+  const h = Buffer.alloc(44)
+  h.write('RIFF', 0); h.writeUInt32LE(36 + data.length, 4); h.write('WAVE', 8); h.write('fmt ', 12)
+  h.writeUInt32LE(16, 16); h.writeUInt16LE(1, 20); h.writeUInt16LE(1, 22); h.writeUInt32LE(rate, 24)
+  h.writeUInt32LE(rate * 2, 28); h.writeUInt16LE(2, 32); h.writeUInt16LE(16, 34); h.write('data', 36); h.writeUInt32LE(data.length, 40)
+  return Buffer.concat([h, data])
+}
+fs.writeFileSync(path.join(OUT, 'speech.wav'), wav(5))
+console.log('wrote meal.png, body.png and speech.wav to', OUT)

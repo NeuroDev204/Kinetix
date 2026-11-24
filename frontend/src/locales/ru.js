@@ -5944,4 +5944,5 @@ export default {
   "Summarise this day": "Summarise this day",
   "Summarising…": "Summarising…",
   "What you said to your trainer, the mistakes, the new words.": "What you said to your trainer, the mistakes, the new words.",
+  "What was said": "What was said",
 }

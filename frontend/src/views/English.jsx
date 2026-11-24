@@ -56,6 +56,7 @@ export default function English() {
       const e = S.english[day]
       return <section className="card nutr-meal" key={day}>
         <div className="nutr-meal-h"><b>{day}</b></div>
+        {e.transcript && <details><summary className="small">{t('What was said')}</summary><pre className="small" style={{ whiteSpace: 'pre-wrap' }}>{e.transcript}</pre></details>}
         {e.mistakes?.length > 0 && <ul>{e.mistakes.map((m, i) => <li key={i}><s>{m.said}</s> → {m.better}</li>)}</ul>}
         {e.newWords?.length > 0 && <div className="small">{t('New words')}: {e.newWords.join(', ')}</div>}
         {e.pendingSummary ? <div className="small">{t('Summarising…')}</div>

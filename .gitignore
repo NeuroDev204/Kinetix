@@ -59,3 +59,4 @@ frontend/test-results/
 frontend/playwright-report/
 frontend/e2e/fixtures/meal.png
 frontend/e2e/fixtures/body.png
+frontend/e2e/fixtures/speech.wav

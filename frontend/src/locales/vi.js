@@ -5906,4 +5906,5 @@ export default {
   "Summarise this day": "Tóm tắt ngày này",
   "Summarising…": "Đang tóm tắt…",
   "What you said to your trainer, the mistakes, the new words.": "Điều bạn nói với huấn luyện viên, các lỗi và từ mới.",
+  "What was said": "Nội dung đã nói",
 };
