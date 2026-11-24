@@ -56,6 +56,7 @@ RUN npm ci --omit=dev --omit=optional && npm cache clean --force
 COPY server.js push-messages.js nudge.js nudge-copy.js wrapped.js wrapped-copy.js checkin-reminder.js checkin-copy.js verify-error.js password.js rate-limit.js passkeys-store.js device-link.js watch-relay.js media.js queue.js sync-stamps.js durable.js admin-socket.js recover.js net-guard.js permissions.js consent.js share-log.js tokens.js oauth.js budgets.js role-claims.js origin.js ./
 COPY coach ./coach
 COPY kinetix ./kinetix
+COPY scripts/kinetix-setup.mjs ./scripts/kinetix-setup.mjs
 COPY library ./library
 COPY oidc ./oidc
 COPY integrations ./integrations
