@@ -12,6 +12,11 @@ export const DATA_CATEGORIES = Object.freeze([
   'prefs'        // unit, language, effort scale
 ]);
 
+/* Kinetix: photos and videos you chose to have analysed. Only the server's jobs send them (the
+ * physique and meal estimates, the set analysis), so this is listed by the server's disclosure and
+ * not by the phone's own-key Coach, which never sends media. */
+export const SERVER_PHOTO_CATEGORY = 'media';
+
 /* What else the Coach may read, each with its own switch under "What the Coach sees" (stored in
  * S.coach.share). `on` is the default for a profile that never touched the switch. Health is off
  * until asked for: sleep, heart rate and how you feel are more personal than a set of squats. */

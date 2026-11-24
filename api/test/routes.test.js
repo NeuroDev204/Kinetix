@@ -190,7 +190,7 @@ test('the disclosure names the provider and the same five categories the payload
   const r = await call('GET /api/coach/disclosure');
   assert.equal(r.status, 200);
   assert.equal(r.body.providerLabel, 'Google Gemini');
-  assert.deepEqual(r.body.categories, ['plan', 'training', 'bodyweight', 'profile', 'prefs']);
+  assert.deepEqual(r.body.categories, ['plan', 'training', 'bodyweight', 'profile', 'prefs', 'media']);
   assert.equal(r.body.host, 'generativelanguage.googleapis.com');
 });
 

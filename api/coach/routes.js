@@ -7,12 +7,14 @@
 import { candidatesFor, discoverLocal } from './core/local-discovery.js';
 import * as cfgStore from './config.js';
 import * as jobs from './jobs.js';
+import * as physiqueCore from './core/physique.js';
 import { computeCohort } from './cohort.js';
 import { adapterFor } from './adapters/index.js';
 import * as chatgptPlan from './chatgpt-plan.js';
 import { PROVIDER as CHATGPT } from './adapters/chatgpt.js';
 import { canDropPrivileges, privilegeRefusal } from './adapters/spawn.js';
 import { DATA_CATEGORIES } from './core/payload.js';
+import { SERVER_PHOTO_CATEGORY } from './core/categories.js';
 import { validateBaseUrl, validateHeaders, baseUrlFor } from './core/providers.js';
 
 // Job failures the user sees, in the app's own voice. The raw provider detail never reaches
@@ -64,7 +66,7 @@ export function coachRoutes({ json, readBody, readSession, requireAdmin }) {
         // host before anything is sent there, and a compatible endpoint is only nameable by it.
         // Never the path, and the base URL cannot carry credentials (validateBaseUrl).
         host: hostOf(baseUrlFor(cfg.provider, cfg)),
-        categories: DATA_CATEGORIES,
+        categories: [...DATA_CATEGORIES, SERVER_PHOTO_CATEGORY],
         version: 1
       });
     },
@@ -104,6 +106,21 @@ export function coachRoutes({ json, readBody, readSession, requireAdmin }) {
           vitals: body.vitals && typeof body.vitals === 'object' && !Array.isArray(body.vitals) ? body.vitals : null
         });
         json(res, 202, { job });
+      } catch (e) { failEnqueue(res, e); }
+    },
+
+    // Kinetix: a body photo and the facts the estimate needs. Answers the job's id; 409 when the
+    // photo is not on the server yet (the app syncs its media and asks again).
+    'POST /api/coach/physique': async (req, res) => {
+      const user = guard(req, res); if (!user) return;
+      const body = await readBody(req);
+      const media = physiqueCore.cleanMediaRef(body.media);
+      const facts = physiqueCore.cleanPhysiqueBody(body.body);
+      if (!media || !facts.ok) return json(res, 400, { error: 'invalid' });
+      if (!jobs.hasMedia(user.id, media.hash)) return json(res, 409, { error: 'media-missing' });
+      try {
+        const job = jobs.enqueue(user.id, { kind: 'physique', lang: body.lang, media, body: facts.body });
+        json(res, 202, { id: job.id });
       } catch (e) { failEnqueue(res, e); }
     },
 

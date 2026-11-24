@@ -102,6 +102,10 @@ const _refinePlan = async text => DEMO ? (await demo()).demoRefine(S()) : LOCAL(
 export const refinePlan = (...a) => asked(_refinePlan)(...a).then(track)
 const _requestDebrief = async workoutId => DEMO ? (await demo()).demoDebrief(S(), workoutId) : LOCAL() ? (await local()).localDebrief(S(), workoutId) : api('/api/coach/debrief', { method: 'POST', body: JSON.stringify({ workoutId: workoutId || null, lang: getLang() }) })
 export const requestDebrief = (...a) => asked(_requestDebrief)(...a).then(track)
+// Kinetix: a body-fat estimate from one photo already on the server (the physique job). The server
+// answers 409 media-missing while the photo has not reached it; the caller syncs media and asks again.
+const _requestPhysique = async (ref, body) => api('/api/coach/physique', { method: 'POST', body: JSON.stringify({ media: { hash: ref.hash, mime: ref.mime }, body, lang: getLang() }) })
+export const requestPhysique = (...a) => asked(_requestPhysique)(...a)
 // A question in the chat, answered in words (the `ask` job). The session running here goes along
 // (lib/coach-context.js): the server never holds it.
 // Routines from the library that match the question (lib/routine-library.js), so the Coach can

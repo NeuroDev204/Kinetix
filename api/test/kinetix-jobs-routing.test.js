@@ -4,6 +4,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tempData, writeState, sampleState } from './helpers.mjs';
@@ -21,6 +23,12 @@ const jobs = await import('../coach/jobs.js');
 const { adapterFor } = await import('../coach/adapters/index.js');
 const { forcePrivilegeVerdict } = await import('../coach/adapters/spawn.js');
 forcePrivilegeVerdict({ ok: true, dropped: false, why: 'pinned by the test suite' });
+
+// The vision job reads its photo through the media store; give the store one photo for this profile.
+const photoDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kinetix-routing-'));
+const photoFile = path.join(photoDir, 'a.jpg');
+fs.writeFileSync(photoFile, Buffer.from('jpeg'));
+jobs.setMediaFile((uid, hash) => (hash === 'a'.repeat(64) ? { path: photoFile, ext: 'jpg', mime: 'image/jpeg', size: 4 } : null));
 
 const compatible = adapterFor('compatible');
 const gemini = adapterFor('gemini');

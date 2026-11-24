@@ -22,6 +22,7 @@ import * as payloadLib from './core/payload.js';
 import { runPipeline } from './core/pipeline.js';
 import { providerForJob, fallbackFor } from './core/route.js';
 import { loadMedia } from './media-input.js';
+import * as physiqueLib from './core/physique.js';
 import { extractJSON } from './core/parse.js';
 import { userMessageFor } from './core/failure.js';
 import { hashPlan } from './core/plan-hash.js';
@@ -249,6 +250,9 @@ export function enqueue(uid, opts) {
     trigger: opts.trigger || 'manual',                // 'manual' | 'scheduled'
     workoutId: opts.workoutId ? String(opts.workoutId).slice(0, 40) : null,
     intake: opts.intake || null,
+    // Kinetix physique job: the photo ref (loaded by execute, never sent as text) and the body facts.
+    media: opts.kind === 'physique' && opts.media ? opts.media : null,
+    body: opts.kind === 'physique' && opts.body ? opts.body : null,
     note: clampMessage(opts.note),
     refine: clampMessage(opts.refine),
     // A question's running session, sent by the phone (the server never holds `active`). Kept on
@@ -351,6 +355,8 @@ export function setProposalHook(fn) { onProposal = fn; }
 // Set by server.js: (uid, hash) => the media store's file record, for photos a job was given.
 let mediaFile = null;
 export function setMediaFile(fn) { mediaFile = fn; }
+/** Whether the store holds this photo for this profile (the physique route answers 409 without it). */
+export function hasMedia(uid, hash) { return !!(mediaFile && mediaFile(uid, hash)); }
 
 /* ---------- execution ---------- */
 
@@ -381,7 +387,9 @@ async function execute(job) {
   // Web research: a chat question, with the owner allowing it, a provider that has a search tool,
   // and the person having switched it on for themselves.
   const useWeb = job.kind === 'ask' && !!cfg.web && !!cfgStore.providerMeta(cfg).web && S.coach?.web === true;
-  const payload = payloadLib.build(S, {
+  const payload = job.kind === 'physique'
+    ? physiqueLib.buildPhysique({ handle: handleFor(job.uid), lang: job.lang, body: job.body })
+    : payloadLib.build(S, {
     handle: handleFor(job.uid),
     kind: job.kind,
     intake: job.intake,

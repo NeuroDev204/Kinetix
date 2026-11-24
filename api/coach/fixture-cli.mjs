@@ -69,6 +69,11 @@ if (MODE === 'nochange' || (kind === 'review' && !(P.window?.workouts || []).len
   out({ coach_contract: 1, nochange: true, reading: 'Not enough new training to read anything into yet — keep logging and ask again in a week.' });
 }
 
+// Kinetix physique estimate: a fixed, plausible range; the app's tests check the wiring, not the number.
+if (kind === 'physique') {
+  out({ coach_contract: 1, physique: { bodyFatRange: [12, 16], notes: 'Fixture estimate for testing.', focusAreas: ['core', 'back'] } });
+}
+
 if (kind === 'create') {
   const lib = (P.library || []).slice(0, 6);
   const ex = (i) => lib[i % Math.max(1, lib.length)] || { id: 'unknown' };

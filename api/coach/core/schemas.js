@@ -194,4 +194,17 @@ export const ADAPT_SCHEMA = {
   required: ['coach_contract']
 };
 
-export const SCHEMAS = { review: REVIEW_SCHEMA, create: CREATE_SCHEMA, refine: CREATE_SCHEMA, debrief: DEBRIEF_SCHEMA, ask: ASK_SCHEMA, adapt: ADAPT_SCHEMA };
+export const PHYSIQUE_SCHEMA = {
+  type: 'object',
+  properties: {
+    coach_contract: { type: 'integer' },
+    physique: {
+      type: 'object',
+      properties: { bodyFatRange: { type: 'array', items: { type: 'number' } }, notes: STR, focusAreas: STRINGS },
+      required: ['bodyFatRange', 'notes', 'focusAreas']
+    }
+  },
+  required: ['coach_contract', 'physique']
+};
+
+export const SCHEMAS = { physique: PHYSIQUE_SCHEMA, review: REVIEW_SCHEMA, create: CREATE_SCHEMA, refine: CREATE_SCHEMA, debrief: DEBRIEF_SCHEMA, ask: ASK_SCHEMA, adapt: ADAPT_SCHEMA };

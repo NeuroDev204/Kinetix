@@ -15,7 +15,7 @@ import { buildPrompt, buildPromptParts } from './prompt.js';
 import { SCHEMAS } from './schemas.js';
 import { extractJSON, contractOK } from './parse.js';
 import { classifyFailure, redact } from './failure.js';
-import { validatePlan, validateReview, validateDebrief, validateAsk, validateAdapt } from './validate.js';
+import { validatePlan, validateReview, validateDebrief, validateAsk, validateAdapt, validatePhysique } from './validate.js';
 import { isChangeList, changesOntoPlan } from './refine-changes.js';
 
 /**
@@ -79,7 +79,9 @@ export async function attemptOnce({ adapter, cfg, kind, payload, model, timeoutM
   const answer = kind === 'create' && isChangeList(parsed.value)
     ? changesOntoPlan(payload.refine?.previous, parsed.value) || parsed.value
     : parsed.value;
-  const checked = kind === 'review'
+  const checked = kind === 'physique'
+    ? validatePhysique(parsed.value)
+    : kind === 'review'
     ? validateReview(parsed.value, payload.plan, { customIds, equipment, offered, noDumbbells, machines })
     : kind === 'debrief'
       ? validateDebrief(parsed.value)

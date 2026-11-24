@@ -968,3 +968,23 @@ export function validateAdapt(data, today, ctx = {}) {
   if (!changes.length) return { ok: true, nochange: true, reading: clampText(data.summary || data.reading || '', 600) };
   return { ok: true, proposal: { summary: clampText(data.summary, 600), changes } };
 }
+
+/* =============================== physique (Kinetix) =============================== */
+
+/** The body-fat estimate from a physique photo. Kept only when the range is plausible. */
+export function validatePhysique(data) {
+  if (!data || typeof data !== 'object') return fail(['the answer was not an object']);
+  const errors = [];
+  if (data.coach_contract !== 1) errors.push('coach_contract must be 1');
+  const p = data.physique;
+  if (!p || typeof p !== 'object') errors.push('physique is missing');
+  else {
+    const r = p.bodyFatRange;
+    if (!Array.isArray(r) || r.length !== 2 || !r.every(Number.isFinite)) errors.push('bodyFatRange must be two numbers');
+    else if (!(r[0] >= 3 && r[0] <= r[1] && r[1] <= 60)) errors.push('bodyFatRange must be low then high, between 3 and 60');
+    if (typeof p.notes !== 'string' || p.notes.length > 600) errors.push('notes must be text of at most 600 characters');
+    if (!Array.isArray(p.focusAreas) || p.focusAreas.length > 5 || p.focusAreas.some(f => typeof f !== 'string' || f.length > 60)) errors.push('focusAreas: at most 5 strings of 60 characters');
+  }
+  if (errors.length) return fail(errors);
+  return { ok: true, proposal: { coach_contract: 1, physique: { bodyFatRange: [p.bodyFatRange[0], p.bodyFatRange[1]], notes: p.notes, focusAreas: p.focusAreas } } };
+}
