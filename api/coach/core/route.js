@@ -6,7 +6,8 @@
 export const VISION_KINDS = ['physique', 'meal', 'form'];
 
 const OUTPUT_RESERVE = 2048;
-const FALLBACK_ERRORS = ['schema', 'cutoff', 'unreachable', 'timeout', 'provider'];
+// 'unusable' is what the pipeline calls an answer that failed parse or validation (the plan's 'schema').
+const FALLBACK_ERRORS = ['schema', 'unusable', 'cutoff', 'outage', 'unreachable', 'timeout', 'provider'];
 
 // shortcut: chars/3.5 heuristic, switch to the model tokenizer if routing misfires
 export function estimateTokens(text) {

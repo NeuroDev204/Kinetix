@@ -20,6 +20,7 @@ import * as cfgStore from './config.js';
 import { adapterFor } from './adapters/index.js';
 import * as payloadLib from './core/payload.js';
 import { runPipeline } from './core/pipeline.js';
+import { providerForJob, fallbackFor } from './core/route.js';
 import { extractJSON } from './core/parse.js';
 import { userMessageFor } from './core/failure.js';
 import { hashPlan } from './core/plan-hash.js';
@@ -327,7 +328,9 @@ function finish(job, result) {
     // leaves the user with a job that finished and nothing to show for it. It lives here, in
     // the profile's own file — deliberately not in `detail`, which goes to the instance log
     // the admin card renders, and which carries counts and outcomes only (FR-12/42).
-    ...(result.reading ? { reading: String(result.reading).slice(0, 4000) } : {})
+    ...(result.reading ? { reading: String(result.reading).slice(0, 4000) } : {}),
+    // Which provider answered, and whether it was the fallback (Kinetix routing); absent on the single-provider path.
+    ...(result.provider ? { provider: result.provider, fellBack: !!result.fellBack } : {})
   }].slice(-HISTORY_MAX);
   writeUser(job.uid, {
     ...rec,
@@ -404,26 +407,45 @@ async function execute(job) {
 
   // An HTTPS provider has no child process, so no directory for one to live in either.
   const jobDir = adapter.spawns === false ? null : fs.mkdtempSync(path.join(os.tmpdir(), 'coach-'));
-  const env = cfgStore.jobEnv(jobDir || os.tmpdir(), cfgStore.credentialFor(job.uid));
   const ctl = new AbortController();
   aborts.set(job.uid, ctl);
-  try {
-    const ids = jobDir && unprivilegedIds();
-    if (ids) shareJobDir(jobDir, ids);
-
-    const attempt = await runPipeline({
-      adapter, cfg, kind: job.kind, payload, model: cfgStore.modelFor(cfg), timeoutMs: TIMEOUT_MS,
+  // Which provider runs this job: the selected one, or the Kinetix routing for its kind and size.
+  const route = providerForJob(cfg, job.kind, JSON.stringify(payload));
+  // One attempt on one provider, with that provider's own credential, model and privilege gate.
+  const runOn = (provider, reason) => {
+    const a = adapterFor(provider);
+    if (!a) return { ok: false, errorClass: 'off' };
+    const refusal = privilegeRefusal(a);
+    if (refusal) return { ok: false, errorClass: 'unprivileged', detail: refusal };
+    const env = cfgStore.jobEnv(jobDir || os.tmpdir(), cfgStore.credentialFor(job.uid, provider));
+    // A text job on the local model gets the shorter budget, so a sleeping laptop falls back
+    // in minutes rather than the full job budget.
+    const timeoutMs = reason === 'text' && cfg.routing?.textTimeoutMs ? cfg.routing.textTimeoutMs : TIMEOUT_MS;
+    return runPipeline({
+      adapter: a, cfg, kind: job.kind, payload, model: cfgStore.modelFor(cfg, provider), timeoutMs,
       // The HTTP adapters take the fetch and the abort signal they are given; the runtime
       // adapters ignore both.
       invokeOpts: { jobDir, env, fetch: fetchFor(TIMEOUT_MS), signal: ctl.signal, maxTokens: cfg.maxOutputTokens, ...(useWeb ? { web: true } : {}) }
     });
+  };
+  try {
+    const ids = jobDir && unprivilegedIds();
+    if (ids) shareJobDir(jobDir, ids);
+
+    let used = route.provider;
+    let fellBack = false;
+    let attempt = await runOn(route.provider, route.reason);
+    // One fallback, for the failures a second model can fix (core/route.js). Never after a cancel.
+    const fb = !attempt.ok && !ctl.signal.aborted ? fallbackFor(cfg, route.provider, attempt.errorClass) : null;
+    if (fb) { used = fb; fellBack = true; attempt = await runOn(fb, 'fallback'); }
+    const via = { provider: used, fellBack };
     if (!attempt.ok) {
       // Cancelled by a forget, not failed by the provider: the log must not blame the job budget.
       const errorClass = ctl.signal.aborted ? 'forgotten' : attempt.errorClass;
-      return finish(job, { outcome: 'failed', errorClass, detail: attempt.detail || whyUnusable(attempt.errors) });
+      return finish(job, { outcome: 'failed', errorClass, detail: attempt.detail || (attempt.errors ? whyUnusable(attempt.errors) : null), ...via });
     }
     if (attempt.nochange) {
-      return finish(job, { outcome: 'nochange', pending: null, detail: null, reading: attempt.reading });
+      return finish(job, { outcome: 'nochange', pending: null, detail: null, reading: attempt.reading, ...via });
     }
     // A question whose answer is a plan or a change-set (core/ask-actions.js) waits as that kind.
     const kind = attempt.kind || job.kind;
@@ -444,7 +466,7 @@ async function execute(job) {
       ...(job.kind === 'adapt' ? { activeId: job.activeId, focus: payload.focus } : {}),
       ...attempt.result
     };
-    return finish(job, { outcome: 'ready', pending });
+    return finish(job, { outcome: 'ready', pending, ...via });
   } finally {
     aborts.delete(job.uid);
     if (jobDir) removeJobDir(jobDir, unprivilegedIds());
