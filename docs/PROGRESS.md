@@ -16,3 +16,15 @@
 ## Local environment notes
 
 - Playwright 1.56.1 cannot download Chromium on this OS. Set `PW_CHROMIUM` to a local Chromium binary to run `npm run e2e`.
+
+## Phase 1: AI routing (kinetix/p1-routing)
+
+- [x] 1.1 Provider-aware credentials and routing config — 81e452e — api npm test (+ frontend vitest)
+- [x] 1.2 Router module — 165a76b — api npm test, check-core-loadable
+- [x] 1.3 Route and fall back in the job runner — 8a04580 — api npm test
+- [x] 1.4 Image/video input for the Gemini adapter — 58260d7 — api npm test
+- [x] 1.5 Setup and smoke scripts — cce4e0d — api npm test; real smoke run once (see below)
+
+Real smoke, phase 1 (`KINETIX_REAL_AI=1 node api/scripts/kinetix-smoke.mjs`):
+- FAIL compatible-text unreachable (laptop Ollama not reachable from this machine; expected)
+- FAIL gemini-vision timeout (gemini-3.8-flash answered HTTP 503 to a direct call; the adapter retried until its budget ran out)
