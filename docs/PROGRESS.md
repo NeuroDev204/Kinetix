@@ -39,3 +39,4 @@ Real smoke, phase 1 (`KINETIX_REAL_AI=1 node api/scripts/kinetix-smoke.mjs`):
 - [ ] 3.5 Native voice audio session — JS done (voice-session.js, speak guard); Swift part blocked, see docs/BLOCKERS.md
 - [x] 3.6 Voice tools, persona and Talk button — ca6986c — frontend vitest, locales, build
 - [x] 3.7 English log and summary job — f76915f — api npm test, frontend vitest, locales
+- [x] 3.8 E2E live trainer — channel only (see ledger); 5 E2E specs pass
