@@ -5981,4 +5981,6 @@ export default {
   "This week’s meal plan": "This week’s meal plan",
   "Will analyse when online": "Will analyse when online",
   "kcal": "kcal",
+  "Calories and meals": "Calories and meals",
+  "{0} kcal a day · protein {1} g · carbs {2} g · fat {3} g": "{0} kcal a day · protein {1} g · carbs {2} g · fat {3} g",
 }

@@ -14,6 +14,7 @@ const STRINGS = { type: 'array', items: { type: 'string' } };
 export const REVIEW_SCHEMA = {
   type: 'object',
   properties: {
+    nutrition: { type: "object" },
     coach_contract: { type: 'integer' },
     nochange: { type: 'boolean' },
     reading: STR,

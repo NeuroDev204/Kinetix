@@ -441,11 +441,13 @@ const RoutineBlock = ({ r, unit, speedUnit }) => <div className="pcard-rt">
 function ReviewCard({ p, S, update, toast, refresh }) {
   const marked = useMemo(() => markStale(p, S), [p, S])
   const usable = applicable(marked)
-  const [accepted, setAccepted] = useState(() => new Set(usable.map(c => c.id)))
+  // Kinetix: the review's calorie and meal plan is one more thing to accept, under the id 'nutrition'.
+  const nut = marked.nutrition
+  const [accepted, setAccepted] = useState(() => new Set([...usable.map(c => c.id), ...(nut ? ['nutrition'] : [])]))
   const toggle = id => setAccepted(s => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n })
 
   const apply = () => {
-    const ids = [...accepted].filter(id => usable.some(c => c.id === id))
+    const ids = [...accepted].filter(id => (id === 'nutrition' ? !!nut : usable.some(c => c.id === id)))
     if (!ids.length) { discard(); return }
     try {
       update(s => {
@@ -492,6 +494,13 @@ function ReviewCard({ p, S, update, toast, refresh }) {
           {!stale && <Check checked={accepted.has(c.id)} onChange={() => toggle(c.id)} />}
         </ChangeRow>
       })}
+
+      {nut && <div className="pcard-row" data-nutrition>
+        <b>{t('Calories and meals')}</b>
+        <p className="pcard-sum">{t('{0} kcal a day · protein {1} g · carbs {2} g · fat {3} g', nut.kcal, nut.protein, nut.carbs, nut.fat)}</p>
+        {nut.why && <p className="pcard-sum">{nut.why}</p>}
+        <Check checked={accepted.has('nutrition')} onChange={() => toggle('nutrition')} />
+      </div>}
 
       <Notes notes={marked.notes} />
 

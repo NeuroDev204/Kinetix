@@ -90,3 +90,12 @@ A `week` change names **exactly one** routine (or `"rest"` / `null`) and **repla
 Only one `programme` change per review. Its targets name exercises of the plan (`exId`, with `routineId` when the same exercise is in several routines and only one should change); a new programme runs over the plan's own schedule and starts when the lifter starts it.
 
 `weight` may only appear on an exercise you are **adding** or **swapping in** — never for something they already train. Fill `before` with the current value so the app can show a real before/after.
+
+## Nutrition (Kinetix, optional)
+
+When the payload has a `nutrition` block, you may propose a new calorie target and a meal plan for
+the next week in `nutrition`: `kcal` (1200 to 5000), `protein` (40 to 300 g), `carbs` (0 to 700 g),
+`fat` (20 to 250 g), `why` (at most 400 characters, the evidence from the meals and the weight
+trend), and `mealPlan` (at most 7 days, each with `day` and up to 6 short `meals`). Propose a
+change only when the logged meals and the weight trend clearly call for one. Otherwise leave
+`nutrition` out. Nothing changes until the person accepts it.

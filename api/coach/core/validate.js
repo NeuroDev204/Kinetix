@@ -747,15 +747,19 @@ export function validateReview(data, plan, ctx = {}) {
   // a duplicate among them this is not an honest "no change" — the summary still describes the
   // swap — so it goes back for repair rather than out as a reading.
   if (!kept.length && dropped.length) return fail(dropped);
-  if (!kept.length) {
+  // Kinetix: a nutrition change is a reason to answer on its own, even with no training change.
+  if (!kept.length && !(data.nutrition !== undefined && data.nutrition !== null)) {
     // An empty change list and "no changes" are the same outcome; treat it as the latter
     // rather than showing someone an empty proposal screen (FR-25).
     return { ok: true, nochange: true, reading: clampText(data.summary || data.reading || '', 4000) };
   }
+  const nut = nutritionOf(data);
+  if (nut.error) return fail([nut.error]);
   return {
     ok: true,
     proposal: {
       summary: clampText(data.summary || '', 4000),
+      ...(nut.value ? { nutrition: nut.value } : {}),
       evidence: {
         // Clamped because this is stored verbatim in the synced coach log, and trim() cannot
         // shrink a single oversized entry — one answer could push a profile permanently over
@@ -1010,4 +1014,24 @@ export function validateMeal(data) {
   if (errors.length) return fail(errors);
   const clean = items.map(it => ({ name: it.name.trim(), grams: it.grams, kcal: it.kcal, protein: it.protein, carbs: it.carbs, fat: it.fat }));
   return { ok: true, proposal: { coach_contract: 1, items: clean, ...(typeof data.note === 'string' && data.note.trim() ? { note: data.note.trim().slice(0, 300) } : {}) } };
+}
+
+/* Kinetix: the review's optional nutrition change. Null when the answer has none. */
+function nutritionOf(data) {
+  const n = data.nutrition;
+  if (n === undefined || n === null) return { value: null };
+  if (typeof n !== 'object' || Array.isArray(n)) return { error: 'nutrition must be an object' };
+  const r = (v, lo, hi) => typeof v === 'number' && Number.isFinite(v) && v >= lo && v <= hi;
+  if (!r(n.kcal, 1200, 5000)) return { error: 'nutrition.kcal must be 1200 to 5000' };
+  if (!r(n.protein, 40, 300)) return { error: 'nutrition.protein must be 40 to 300 grams' };
+  if (!r(n.carbs, 0, 700)) return { error: 'nutrition.carbs must be 0 to 700 grams' };
+  if (!r(n.fat, 20, 250)) return { error: 'nutrition.fat must be 20 to 250 grams' };
+  if (typeof n.why !== 'string' || n.why.length > 400) return { error: 'nutrition.why must be text of at most 400 characters' };
+  const plan = Array.isArray(n.mealPlan) ? n.mealPlan : null;
+  if (!plan || plan.length > 7) return { error: 'nutrition.mealPlan must be a list of at most 7 days' };
+  for (const d of plan) {
+    if (!d || typeof d.day !== 'string' || !Array.isArray(d.meals) || d.meals.length > 6) return { error: 'each mealPlan day needs a name and at most 6 meals' };
+    if (d.meals.some(m => typeof m !== 'string' || m.length > 120)) return { error: 'each meal in the plan is text of at most 120 characters' };
+  }
+  return { value: { kcal: n.kcal, protein: n.protein, carbs: n.carbs, fat: n.fat, why: n.why, mealPlan: plan.map(d => ({ day: d.day.slice(0, 20), meals: d.meals })) } };
 }

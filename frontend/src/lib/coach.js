@@ -300,6 +300,8 @@ export function revertLast(s) {
   s.week = clone(snap.week)
   // Snapshots taken before this field existed have nothing to put back.
   if (snap.dayPlanRestore) Object.assign(s.dayPlan, snap.dayPlanRestore)
+  // Kinetix: a review that set the calorie plan gives the one it replaced back.
+  if (snap.nutritionRestore !== undefined) s.nutritionPlan = snap.nutritionRestore;
   // A created plan that took over the rotation (useInRotation) gives the old loop and its pass back.
   if (snap.rotationRestore) {
     s.rotation = clone(snap.rotationRestore.rotation)
@@ -655,9 +657,16 @@ export function applyChangeSet(s, proposal, acceptedIds) {
   validateProposal(proposal)
   const accepted = new Set(acceptedIds || [])
   const changes = (proposal.changes || []).filter(c => accepted.has(c.id) && c.status !== 'stale')
-  if (!changes.length) return { applied: 0 }
+  // Kinetix: the review's calorie and meal plan, applied when the person accepts it (id 'nutrition').
+  const nutrition = proposal.nutrition && accepted.has('nutrition') ? proposal.nutrition : null
+  if (!changes.length && !nutrition) return { applied: 0 }
 
   pushSnapshot(s, proposal.id, t('Before the Coach’s changes'))
+  if (nutrition) {
+    const snap = coachOf(s).snapshots.at(-1)
+    snap.nutritionRestore = clone(s.nutritionPlan ?? null)
+    s.nutritionPlan = { ...nutrition, at: Date.now() }
+  }
   const applied = []
   for (const c of changes) {
     CHANGE_APPLY[c.type](s, c)

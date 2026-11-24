@@ -772,6 +772,9 @@ export function build(S, opts = {}) {
     };
     p.aggregates = aggregates(S, workouts);
     p.bodyweight = { goal: num(S.targetW) ?? null, ...dailyOf(S), series: weighIns(S, p.window.from, null) };
+    // Kinetix: the meals and target for the nutrition part of the review (absent when there are none).
+    const nutrition = buildNutritionForReview(S, now);
+    if (nutrition) { p.nutrition = nutrition; p.bodyweight.trend14 = nutrition.trend14; }
     if (opts.note) p.userNote = String(opts.note).slice(0, MAX_NOTE_CHARS);
     if (opts.cohort) p.cohort = cleanCohort(opts.cohort);
     // A review names mostly what is already trained; 60 candidates is plenty for a swap. But
@@ -826,4 +829,47 @@ function conversation(coach, current) {
     .filter(m => !(m.role === 'user' && now.has(m.text.trim())))
     .slice(-CONVERSATION_LINES)
     .map(m => ({ who: m.role === 'user' ? 'user' : 'coach', text: m.text.trim().slice(0, CONVERSATION_CHARS) }));
+}
+
+/* Kinetix: the meals of one day, summed the same way as the phone's dayTotals (lib/nutrition.js).
+ * A parity test pins the two together. Tombstones and other fields are not meals. */
+const r1 = v => Math.round(v * 10) / 10;
+export function dailyMacros(S, fromDay, toDay) {
+  const meals = Object.values(S?.meals || {}).filter(m => m && typeof m === 'object' && day(m.d));
+  const out = [];
+  for (let t = Date.parse(fromDay + 'T12:00:00Z'), end = Date.parse(toDay + 'T12:00:00Z'); t <= end; t += 86400000) {
+    const d = iso(new Date(t));
+    const on = meals.filter(m => day(m.d) === d);
+    const sum = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
+    for (const m of on) for (const it of Array.isArray(m.items) ? m.items : []) {
+      sum.kcal += num(it?.kcal) || 0; sum.protein += num(it?.protein) || 0; sum.carbs += num(it?.carbs) || 0; sum.fat += num(it?.fat) || 0;
+    }
+    out.push({ d, kcal: r1(sum.kcal), protein: r1(sum.protein), carbs: r1(sum.carbs), fat: r1(sum.fat), meals: on.length });
+  }
+  return out;
+}
+
+/* The weight trend over a series: kg per week from a least-squares line over the days it has. */
+function trendOf(series) {
+  const pts = series.filter(b => Number.isFinite(b.w));
+  if (pts.length < 2) return { perWeek: null, n: pts.length };
+  const x0 = Date.parse(pts[0].d + 'T00:00:00Z');
+  const xs = pts.map(b => (Date.parse(b.d + 'T00:00:00Z') - x0) / 86400000);
+  const ys = pts.map(b => b.w);
+  const mx = xs.reduce((a, b) => a + b, 0) / xs.length, my = ys.reduce((a, b) => a + b, 0) / ys.length;
+  const den = xs.reduce((a, x) => a + (x - mx) ** 2, 0);
+  const slope = den ? xs.reduce((a, x, i) => a + (x - mx) * (ys[i] - my), 0) / den : 0;
+  return { perWeek: Math.round(slope * 7 * 100) / 100, n: pts.length };
+}
+
+/* The review's nutrition block: the target (null when there is none), the last fourteen days of
+ * meals, and the weight trend over the same days. Null when there is neither a target nor a meal. */
+export function buildNutritionForReview(S, now = Date.now()) {
+  const to = iso(new Date(now));
+  const from = iso(new Date(now - 13 * 86400000));
+  const days = dailyMacros(S, from, to);
+  const plan = S?.nutritionPlan;
+  if (!plan && !days.some(d => d.meals)) return null;
+  const target = plan ? { kcal: num(plan.kcal) ?? null, protein: num(plan.protein) ?? null, carbs: num(plan.carbs) ?? null, fat: num(plan.fat) ?? null } : null;
+  return { target, days, trend14: trendOf(weighIns(S, from, to)) };
 }

@@ -5892,4 +5892,6 @@ export default {
   "This week’s meal plan": "Kế hoạch bữa ăn tuần này",
   "Will analyse when online": "Sẽ phân tích khi có mạng",
   "kcal": "kcal",
+  "Calories and meals": "Calo và bữa ăn",
+  "{0} kcal a day · protein {1} g · carbs {2} g · fat {3} g": "{0} kcal mỗi ngày · chất đạm {1} g · tinh bột {2} g · chất béo {3} g",
 };
