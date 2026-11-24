@@ -993,6 +993,24 @@ export function validatePhysique(data) {
   return { ok: true, proposal: { coach_contract: 1, physique: { bodyFatRange: [p.bodyFatRange[0], p.bodyFatRange[1]], notes: p.notes, focusAreas: p.focusAreas } } };
 }
 
+/* =============================== form (Kinetix) =============================== */
+
+export function validateForm(data) {
+  if (!data || typeof data !== 'object') return fail(['the answer was not an object']);
+  const errors = [];
+  if (data.coach_contract !== 1) errors.push('coach_contract must be 1');
+  if (typeof data.summary !== 'string' || data.summary.length > 300) errors.push('summary must be text of at most 300 characters');
+  const issues = data.issues;
+  if (!Array.isArray(issues) || issues.length > 5) errors.push('issues: at most 5');
+  else for (const it of issues) {
+    if (!it || typeof it !== 'object' || (it.rep !== null && it.rep !== undefined && !Number.isInteger(it.rep))) { errors.push('each issue needs a rep number or null'); break; }
+    if (typeof it.issue !== 'string' || it.issue.length > 120 || typeof it.cue !== 'string' || it.cue.length > 80) { errors.push('issue text at most 120 characters and cue at most 80'); break; }
+  }
+  if (!Number.isInteger(data.score) || data.score < 1 || data.score > 10) errors.push('score must be a whole number from 1 to 10');
+  if (errors.length) return fail(errors);
+  return { ok: true, proposal: { coach_contract: 1, summary: data.summary, issues: issues.map(it => ({ rep: it.rep ?? null, issue: it.issue, cue: it.cue })), score: data.score } };
+}
+
 /* =============================== English summary (Kinetix) =============================== */
 
 export function validateEnglish(data) {

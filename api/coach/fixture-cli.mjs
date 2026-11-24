@@ -79,6 +79,10 @@ if (kind === 'meal') {
     : { coach_contract: 1, items: [{ name: 'Fixture rice', grams: 200, kcal: 260, protein: 5, carbs: 57, fat: 1 }] });
 }
 
+if (kind === 'form') {
+  out({ coach_contract: 1, summary: 'Fixture set: steady tempo.', issues: [{ rep: 3, issue: 'Heels lifted at the bottom.', cue: 'Keep weight through the heels.' }], score: 7 });
+}
+
 if (kind === 'physique') {
   out({ coach_contract: 1, physique: { bodyFatRange: [12, 16], notes: 'Fixture estimate for testing.', focusAreas: ['core', 'back'] } });
 }

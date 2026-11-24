@@ -251,7 +251,9 @@ export function enqueue(uid, opts) {
     workoutId: opts.workoutId ? String(opts.workoutId).slice(0, 40) : null,
     intake: opts.intake || null,
     // Kinetix physique job: the photo ref (loaded by execute, never sent as text) and the body facts.
-    media: (opts.kind === 'physique' || opts.kind === 'meal') && opts.media ? opts.media : null,
+    media: (opts.kind === 'physique' || opts.kind === 'meal' || opts.kind === 'form') && opts.media ? opts.media : null,
+    // Kinetix form job: the exercise, the set's weight and reps, and the phone's pose summary.
+    form: opts.kind === 'form' && opts.form ? opts.form : null,
     body: opts.kind === 'physique' && opts.body ? opts.body : null,
     // Kinetix meal job: the app's meal id, so the answer can be written back to that meal.
     mealId: opts.kind === 'meal' && opts.mealId ? String(opts.mealId).slice(0, 40) : null,
@@ -396,6 +398,8 @@ async function execute(job) {
     ? physiqueLib.buildPhysique({ handle: handleFor(job.uid), lang: job.lang, body: job.body })
     : job.kind === 'meal'
     ? physiqueLib.buildMeal({ handle: handleFor(job.uid), lang: job.lang })
+    : job.kind === 'form'
+    ? physiqueLib.buildForm({ handle: handleFor(job.uid), lang: job.lang, exercise: job.form?.exercise, set: job.form?.set, pose: job.form?.pose })
     : job.kind === 'english-summary'
     ? physiqueLib.buildEnglish({ handle: handleFor(job.uid), lang: job.lang, transcript: job.english?.transcript, day: job.english?.day })
     : payloadLib.build(S, {

@@ -228,4 +228,15 @@ export const ENGLISH_SUMMARY_SCHEMA = {
   required: ['coach_contract', 'mistakes', 'newWords']
 };
 
-export const SCHEMAS = { 'english-summary': ENGLISH_SUMMARY_SCHEMA, meal: MEAL_SCHEMA, physique: PHYSIQUE_SCHEMA, review: REVIEW_SCHEMA, create: CREATE_SCHEMA, refine: CREATE_SCHEMA, debrief: DEBRIEF_SCHEMA, ask: ASK_SCHEMA, adapt: ADAPT_SCHEMA };
+export const FORM_SCHEMA = {
+  type: 'object',
+  properties: {
+    coach_contract: { type: 'integer' },
+    summary: STR,
+    issues: { type: 'array', items: { type: 'object', properties: { rep: { type: 'integer' }, issue: STR, cue: STR }, required: ['issue', 'cue'] } },
+    score: { type: 'integer' }
+  },
+  required: ['coach_contract', 'summary', 'issues', 'score']
+};
+
+export const SCHEMAS = { form: FORM_SCHEMA, 'english-summary': ENGLISH_SUMMARY_SCHEMA, meal: MEAL_SCHEMA, physique: PHYSIQUE_SCHEMA, review: REVIEW_SCHEMA, create: CREATE_SCHEMA, refine: CREATE_SCHEMA, debrief: DEBRIEF_SCHEMA, ask: ASK_SCHEMA, adapt: ADAPT_SCHEMA };
