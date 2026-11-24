@@ -207,4 +207,14 @@ export const PHYSIQUE_SCHEMA = {
   required: ['coach_contract', 'physique']
 };
 
-export const SCHEMAS = { physique: PHYSIQUE_SCHEMA, review: REVIEW_SCHEMA, create: CREATE_SCHEMA, refine: CREATE_SCHEMA, debrief: DEBRIEF_SCHEMA, ask: ASK_SCHEMA, adapt: ADAPT_SCHEMA };
+export const MEAL_SCHEMA = {
+  type: 'object',
+  properties: {
+    coach_contract: { type: 'integer' },
+    items: { type: 'array', items: { type: 'object', properties: { name: STR, grams: { type: 'number' }, kcal: { type: 'number' }, protein: { type: 'number' }, carbs: { type: 'number' }, fat: { type: 'number' } }, required: ['name', 'grams', 'kcal', 'protein', 'carbs', 'fat'] } },
+    note: STR
+  },
+  required: ['coach_contract', 'items']
+};
+
+export const SCHEMAS = { meal: MEAL_SCHEMA, physique: PHYSIQUE_SCHEMA, review: REVIEW_SCHEMA, create: CREATE_SCHEMA, refine: CREATE_SCHEMA, debrief: DEBRIEF_SCHEMA, ask: ASK_SCHEMA, adapt: ADAPT_SCHEMA };

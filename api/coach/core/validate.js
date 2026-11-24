@@ -988,3 +988,26 @@ export function validatePhysique(data) {
   if (errors.length) return fail(errors);
   return { ok: true, proposal: { coach_contract: 1, physique: { bodyFatRange: [p.bodyFatRange[0], p.bodyFatRange[1]], notes: p.notes, focusAreas: p.focusAreas } } };
 }
+
+/* =============================== meal (Kinetix) =============================== */
+
+/** The dishes in a meal photo. An empty list is an answer only with a note saying why. */
+export function validateMeal(data) {
+  if (!data || typeof data !== 'object') return fail(['the answer was not an object']);
+  const errors = [];
+  if (data.coach_contract !== 1) errors.push('coach_contract must be 1');
+  const items = data.items;
+  if (!Array.isArray(items) || items.length > 12) errors.push('items must be a list of at most 12 dishes');
+  else {
+    const num = (v, lo, hi) => typeof v === 'number' && Number.isFinite(v) && v >= lo && v <= hi;
+    for (const it of items) {
+      if (!it || typeof it !== 'object' || typeof it.name !== 'string' || !it.name.trim() || it.name.length > 80) { errors.push('each dish needs a name of at most 80 characters'); break; }
+      if (!num(it.grams, 0.001, 3000) || !num(it.kcal, 0, 4000)) { errors.push('grams must be above 0 and at most 3000; kcal 0 to 4000'); break; }
+      if (!num(it.protein, 0, 500) || !num(it.carbs, 0, 500) || !num(it.fat, 0, 500)) { errors.push('macros must be 0 to 500 grams'); break; }
+    }
+    if (!items.length && !(typeof data.note === 'string' && data.note.trim())) errors.push('an empty answer needs a note saying no food was found');
+  }
+  if (errors.length) return fail(errors);
+  const clean = items.map(it => ({ name: it.name.trim(), grams: it.grams, kcal: it.kcal, protein: it.protein, carbs: it.carbs, fat: it.fat }));
+  return { ok: true, proposal: { coach_contract: 1, items: clean, ...(typeof data.note === 'string' && data.note.trim() ? { note: data.note.trim().slice(0, 300) } : {}) } };
+}

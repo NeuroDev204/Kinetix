@@ -251,7 +251,7 @@ export function enqueue(uid, opts) {
     workoutId: opts.workoutId ? String(opts.workoutId).slice(0, 40) : null,
     intake: opts.intake || null,
     // Kinetix physique job: the photo ref (loaded by execute, never sent as text) and the body facts.
-    media: opts.kind === 'physique' && opts.media ? opts.media : null,
+    media: (opts.kind === 'physique' || opts.kind === 'meal') && opts.media ? opts.media : null,
     body: opts.kind === 'physique' && opts.body ? opts.body : null,
     note: clampMessage(opts.note),
     refine: clampMessage(opts.refine),
@@ -389,6 +389,8 @@ async function execute(job) {
   const useWeb = job.kind === 'ask' && !!cfg.web && !!cfgStore.providerMeta(cfg).web && S.coach?.web === true;
   const payload = job.kind === 'physique'
     ? physiqueLib.buildPhysique({ handle: handleFor(job.uid), lang: job.lang, body: job.body })
+    : job.kind === 'meal'
+    ? physiqueLib.buildMeal({ handle: handleFor(job.uid), lang: job.lang })
     : payloadLib.build(S, {
     handle: handleFor(job.uid),
     kind: job.kind,

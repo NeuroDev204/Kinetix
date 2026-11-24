@@ -70,6 +70,13 @@ if (MODE === 'nochange' || (kind === 'review' && !(P.window?.workouts || []).len
 }
 
 // Kinetix physique estimate: a fixed, plausible range; the app's tests check the wiring, not the number.
+if (kind === 'meal') {
+  // Kinetix meal estimate: one plausible dish, or nothing found with a note when FIXTURE_MODE=meal-empty.
+  out(MODE === 'meal-empty'
+    ? { coach_contract: 1, items: [], note: 'No food found in this photo.' }
+    : { coach_contract: 1, items: [{ name: 'Fixture rice', grams: 200, kcal: 260, protein: 5, carbs: 57, fat: 1 }] });
+}
+
 if (kind === 'physique') {
   out({ coach_contract: 1, physique: { bodyFatRange: [12, 16], notes: 'Fixture estimate for testing.', focusAreas: ['core', 'back'] } });
 }

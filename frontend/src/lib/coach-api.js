@@ -106,6 +106,9 @@ export const requestDebrief = (...a) => asked(_requestDebrief)(...a).then(track)
 // answers 409 media-missing while the photo has not reached it; the caller syncs media and asks again.
 const _requestPhysique = async (ref, body) => api('/api/coach/physique', { method: 'POST', body: JSON.stringify({ media: { hash: ref.hash, mime: ref.mime }, body, lang: getLang() }) })
 export const requestPhysique = (...a) => asked(_requestPhysique)(...a)
+// Kinetix: the dishes in one meal photo already on the server (the meal job). 409 media-missing until it arrives.
+const _requestMeal = async (mealId, ref) => api('/api/coach/meal', { method: 'POST', body: JSON.stringify({ media: { hash: ref.hash, mime: ref.mime }, lang: getLang(), mealId: mealId || null }) })
+export const requestMeal = (...a) => asked(_requestMeal)(...a)
 // A question in the chat, answered in words (the `ask` job). The session running here goes along
 // (lib/coach-context.js): the server never holds it.
 // Routines from the library that match the question (lib/routine-library.js), so the Coach can

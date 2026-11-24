@@ -124,6 +124,19 @@ export function coachRoutes({ json, readBody, readSession, requireAdmin }) {
       } catch (e) { failEnqueue(res, e); }
     },
 
+    // Kinetix: a meal photo. Answers the job's id; 409 while the photo is not on the server yet.
+    'POST /api/coach/meal': async (req, res) => {
+      const user = guard(req, res); if (!user) return;
+      const body = await readBody(req);
+      const media = physiqueCore.cleanMediaRef(body.media);
+      if (!media) return json(res, 400, { error: 'invalid' });
+      if (!jobs.hasMedia(user.id, media.hash)) return json(res, 409, { error: 'media-missing' });
+      try {
+        const job = jobs.enqueue(user.id, { kind: 'meal', lang: body.lang, media });
+        json(res, 202, { id: job.id });
+      } catch (e) { failEnqueue(res, e); }
+    },
+
     // One workout, read closely. Nothing to apply — the card is kept in the user's log.
     'POST /api/coach/debrief': async (req, res) => {
       const user = guard(req, res); if (!user) return;

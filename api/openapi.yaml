@@ -4175,6 +4175,46 @@ paths:
           description: 'The photo ref or the facts are missing or out of range (error is invalid).'
         '409':
           description: 'The photo is not on the server yet (error is media-missing).'
+  /api/coach/meal:
+    post:
+      tags: [coach]
+      operationId: postCoachMeal
+      summary: Estimate the dishes in a meal photo
+      description: |
+        Queues a `meal` job: one photo of a meal the person chose, already on the server. The answer is a
+        pending proposal of kind `meal` with the dishes, grams and macros, or an empty list with a note
+        when no food is visible. Answers 409 `media-missing` when the photo is not on the server yet.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [media]
+              properties:
+                media:
+                  type: object
+                  required: [hash]
+                  properties:
+                    hash: { type: string, pattern: '^[0-9a-f]{64}$' }
+                    mime: { type: string, enum: [image/jpeg, image/png, image/webp] }
+                lang:
+                  type: string
+                  pattern: '^[A-Za-z]{2,3}([-_][A-Za-z0-9]{2,8})?$'
+      responses:
+        '202':
+          description: Queued. The id is the job.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [id]
+                properties:
+                  id: { type: string }
+        '400':
+          description: 'The photo ref is missing or invalid (error is invalid).'
+        '409':
+          description: 'The photo is not on the server yet (error is media-missing).'
   /api/coach/ask:
     post:
       tags: [coach]

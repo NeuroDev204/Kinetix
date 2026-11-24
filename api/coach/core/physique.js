@@ -36,3 +36,10 @@ export function cleanMediaRef(m) {
   const mime = typeof m.mime === 'string' && /^image\/(jpeg|png|webp)$/.test(m.mime) ? m.mime : 'image/jpeg';
   return { hash: m.hash, mime };
 }
+
+/** The payload a meal job sends: the day and the language. The photo travels apart, as for physique. */
+export function buildMeal({ handle, lang, now = Date.now() }) {
+  const d = new Date(now);
+  const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  return { coach_contract: 1, task: 'meal', meta: { profile: handle, lang: lang || 'en', today } };
+}
