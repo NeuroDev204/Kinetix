@@ -22,6 +22,9 @@ async function waitFor(url, ms = 60000) {
   }
 }
 
+// The api and web output go to KINETIX_E2E_LOG when it is set (for debugging a failing run).
+const logFd = () => (process.env.KINETIX_E2E_LOG ? fs.openSync(process.env.KINETIX_E2E_LOG, "a") : "ignore");
+
 export async function startStack({ coach = { enabled: true, provider: 'fixture' }, env = {} } = {}) {
   const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kinetix-e2e-'))
   // Write coach.json through the api's own config module, so the file shape is the one it reads.
@@ -32,12 +35,12 @@ export async function startStack({ coach = { enabled: true, provider: 'fixture' 
   const api = spawn(process.execPath, [path.join(API, 'server.js')], {
     cwd: API,
     env: { ...process.env, DATA_DIR: dataDir, PORT: String(API_PORT), RP_ID: 'localhost', ORIGIN: BASE, FIRST_USER_ADMIN: '1', ...env },
-    stdio: 'ignore',
+    stdio: ['ignore', logFd(), logFd()],
   })
   const web = spawn(path.join(FRONTEND, 'node_modules/.bin/vite'), ['--port', String(WEB_PORT), '--strictPort'], {
     cwd: FRONTEND,
     env: { ...process.env, API_TARGET: `http://127.0.0.1:${API_PORT}`, API_ORIGIN: BASE },
-    stdio: 'ignore',
+    stdio: ['ignore', logFd(), logFd()],
   })
 
   const stop = async () => {

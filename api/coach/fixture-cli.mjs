@@ -23,6 +23,8 @@ const read = () => new Promise(resolve => {
 const prompt = await read();
 
 if (MODE === 'timeout') { await new Promise(() => {}); }          // never resolves — the runner kills us
+// The free tier's quota, as the Gemini CLI reports it: the job fails with a clear class, once.
+if (MODE === 'quota') { process.stderr.write('429 quota exceeded\n'); process.exit(1); }
 if (MODE === 'crash') { process.stderr.write('fixture: simulated crash\n'); process.exit(3); }
 if (MODE === 'invalid') { process.stdout.write('I am afraid I cannot do that.\n'); process.exit(0); }
 

@@ -57,3 +57,5 @@ frontend/ios/App/WatchCore/.build/
 frontend/e2e/fixtures/squat-5reps.mp4
 frontend/test-results/
 frontend/playwright-report/
+frontend/e2e/fixtures/meal.png
+frontend/e2e/fixtures/body.png

@@ -1,12 +1,13 @@
 // Kinetix nutrition: today's target against what the meal photos add up to, each meal's dishes with
 // editable grams, a meal photo to add, and the week's meal plan from the Coach.
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useStore } from '../store/useStore.js'
 import { t } from '../lib/i18n.js'
 import { todayISO } from '../lib/format.js'
 import { mealsOn, dayTotals } from '../lib/nutrition.js'
-import { addMeal, failMeal, setItemGrams, removeMeal, analyseMeal } from '../lib/meal-log.js'
+import { addMeal, applyMealResult, failMeal, setItemGrams, removeMeal, analyseMeal } from '../lib/meal-log.js'
 import { useMediaPicker } from '../components/CustomMediaField.jsx'
+import { coachStatus, resolvePending } from '../lib/coach-api.js'
 import { Button } from '../components/ui.jsx'
 import './Nutrition.css'
 
@@ -25,6 +26,35 @@ export default function Nutrition() {
   const [day, setDay] = useState(() => todayISO())
   const [note, setNote] = useState(null)
   const plan = S.nutritionPlan
+  // The last job outcome already taken into a meal, so a finished failure is not re-applied over a retry.
+  const seenFailure = useRef(null)
+
+  // A meal's answer comes back as a pending proposal of kind meal, tagged with the meal's id. Take it
+  // into the meal, then clear it, while this screen is open and a meal is still waiting.
+  const waiting = Object.values(S.meals || {}).some(m => m && m.status === 'pending')
+  useEffect(() => {
+    if (!waiting) return undefined
+    let alive = true
+    const tick = async () => {
+      try {
+        const st = await coachStatus()
+        const p = st?.pending
+        if (alive && p && p.kind === 'meal' && p.mealId) {
+          update(s => { applyMealResult(s, p.mealId, p) })
+          await resolvePending({ accepted: ['meal'], rejected: [] }).catch(() => {})
+        }
+        // A meal job that failed (quota, outage) marks its meal failed, so it can be tried again.
+        const last = st?.last
+        if (alive && !st?.job && !p && last && last.kind === 'meal' && last.mealId && last.outcome === 'failed' && last.id !== seenFailure.current) {
+          seenFailure.current = last.id
+          update(s => { failMeal(s, last.mealId, last.errorClass) })
+        }
+      } catch { /* try again on the next tick */ }
+    }
+    tick()
+    const iv = setInterval(tick, 2000)
+    return () => { alive = false; clearInterval(iv) }
+  }, [waiting, update])
   const totals = dayTotals(S, day)
   const meals = mealsOn(S, day)
   const today = day === todayISO()
@@ -44,6 +74,8 @@ export default function Nutrition() {
     setNote(r === 'offline' ? t('Will analyse when online') : null)
   }
   const retry = async m => {
+    // Back to pending first, so the screen takes the answer when it comes.
+    update(s => { if (s.meals?.[m.id]) s.meals[m.id].status = 'pending' })
     const r = await analyseMeal(m.id, m.m)
     if (r === 'failed') update(s => failMeal(s, m.id, 'failed'))
     setNote(r === 'offline' ? t('Will analyse when online') : null)

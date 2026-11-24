@@ -168,7 +168,7 @@ export function status(uid) {
 }
 function lastOutcome(rec) {
   const h = (rec.history || []).at(-1);
-  return h ? { id: h.id, kind: h.kind, outcome: h.outcome, errorClass: h.errorClass || null, at: h.at, ...(h.message ? { message: h.message } : {}), ...(h.trigger === 'scheduled' ? { trigger: 'scheduled' } : {}), ...(h.reading ? { reading: h.reading } : {}) } : null;
+  return h ? { id: h.id, kind: h.kind, outcome: h.outcome, errorClass: h.errorClass || null, at: h.at, ...(h.mealId ? { mealId: h.mealId } : {}), ...(h.message ? { message: h.message } : {}), ...(h.trigger === 'scheduled' ? { trigger: 'scheduled' } : {}), ...(h.reading ? { reading: h.reading } : {}) } : null;
 }
 function archive(uid, rec, outcome) {
   const history = [...(rec.history || []), {
@@ -253,6 +253,8 @@ export function enqueue(uid, opts) {
     // Kinetix physique job: the photo ref (loaded by execute, never sent as text) and the body facts.
     media: (opts.kind === 'physique' || opts.kind === 'meal') && opts.media ? opts.media : null,
     body: opts.kind === 'physique' && opts.body ? opts.body : null,
+    // Kinetix meal job: the app's meal id, so the answer can be written back to that meal.
+    mealId: opts.kind === 'meal' && opts.mealId ? String(opts.mealId).slice(0, 40) : null,
     note: clampMessage(opts.note),
     refine: clampMessage(opts.refine),
     // A question's running session, sent by the phone (the server never holds `active`). Kept on
@@ -325,6 +327,7 @@ function finish(job, result) {
   const rec = readUser(job.uid);
   const history = [...(rec.history || []), {
     id: job.id, kind: job.kind, trigger: job.trigger, outcome: result.outcome,
+    ...(job.mealId ? { mealId: job.mealId } : {}),
     errorClass: result.errorClass || null, at: Date.now(),
     // The short line lives beside the class, so the chat can say something specific even when
     // the client has no translated line for a class it has not seen before.
@@ -486,7 +489,8 @@ async function execute(job) {
       ...(kind === 'ask' || kind === 'adapt' ? { prev: waitingProposal(readUser(job.uid).pending) } : {}),
       ...(kind !== job.kind ? { from: job.kind } : {}),
       ...(job.kind === 'adapt' ? { activeId: job.activeId, focus: payload.focus } : {}),
-      ...attempt.result
+      ...attempt.result,
+      ...(job.mealId ? { mealId: job.mealId } : {})
     };
     return finish(job, { outcome: 'ready', pending, ...via });
   } finally {

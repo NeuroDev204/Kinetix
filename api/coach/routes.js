@@ -132,7 +132,7 @@ export function coachRoutes({ json, readBody, readSession, requireAdmin }) {
       if (!media) return json(res, 400, { error: 'invalid' });
       if (!jobs.hasMedia(user.id, media.hash)) return json(res, 409, { error: 'media-missing' });
       try {
-        const job = jobs.enqueue(user.id, { kind: 'meal', lang: body.lang, media });
+        const job = jobs.enqueue(user.id, { kind: 'meal', lang: body.lang, media, mealId: typeof body.mealId === 'string' ? body.mealId : null });
         json(res, 202, { id: job.id });
       } catch (e) { failEnqueue(res, e); }
     },
