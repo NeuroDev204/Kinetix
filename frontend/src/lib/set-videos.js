@@ -170,6 +170,9 @@ export function removeSavedSetVideo(state, w, hash, now = Date.now()) {
  * workout's day and start, then by set within it): [{ key, wid, d, start, entry, set, row, m }].
  * `key` names one item for the compare picker. The session in progress is not history yet.
  */
+/** The form result kept on a set (Task 4.4), or null. */
+export const setFormOf = set => (set && set.form && typeof set.form === 'object' ? set.form : null)
+
 export function formVideosFor(state, exId) {
   const out = []
   for (const w of list(state?.workouts)) {

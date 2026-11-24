@@ -12,6 +12,7 @@
 // switch to see the bottom of a squat, and full screen on a tap. Files show from the local store
 // only, fetched there first when signed in (useMediaUrl); a video kept on the phone that filmed
 // it is never asked for anywhere else.
+import { checkForm } from '../lib/form-check.js'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../store/useStore.js'
 import { useUI } from '../store/useUI.js'
@@ -80,7 +81,12 @@ function FilmSetSheet({ at, title, close }) {
     if (got.kind !== 'video') { toast(t('That’s a photo. Pick a video for a set.')); return }
     let res
     update(s => { res = attachSetVideo(s, at, got, { local: filmsLocally(s, user, config) }) })
-    if (res === 'added' || res === 'replaced') { toast(t('Video saved with this set')); close() }
+    if (res === 'added' || res === 'replaced') {
+      toast(t('Video saved with this set'))
+      close()
+      // Form feedback on the set, announced by the trainer or the phone (lib/form-check.js).
+      checkForm({ entryIdx: at.entry, setIdx: at.set }).catch(() => {})
+    }
     else if (res === 'full') toast(t('Up to {0} set videos per workout.', WORKOUT_SET_VIDEOS_MAX))
     else { toast(t('That set is gone.')); close() }
   }

@@ -41,6 +41,9 @@ export function liveTrainer({ todaySummary, unit }) {
 }
 
 /** The Talk button's state: idle, connecting, listening, speaking, or error with why ('quota'). */
+/** The open live session for this workout, or null (form feedback uses it to speak). */
+export const currentLiveSession = () => session
+
 export function useLiveTrainer() {
   const [s, set] = useState(snapshot)
   useEffect(() => { subs.add(set); return () => { subs.delete(set) } }, [])

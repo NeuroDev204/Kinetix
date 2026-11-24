@@ -157,7 +157,8 @@ export function coachRoutes({ json, readBody, readSession, requireAdmin }) {
       if (!media) return json(res, 400, { error: 'invalid' });
       if (!jobs.hasMedia(user.id, media.hash)) return json(res, 409, { error: 'media-missing' });
       try {
-        const job = jobs.enqueue(user.id, { kind: 'form', lang: body.lang, media, form: { exercise: body.exercise, set: body.set, pose: body.pose } });
+        const setRef = body.setRef && Number.isInteger(body.setRef.entry) && Number.isInteger(body.setRef.set) ? { entry: body.setRef.entry, set: body.setRef.set } : null;
+        const job = jobs.enqueue(user.id, { kind: 'form', lang: body.lang, media, form: { exercise: body.exercise, set: body.set, pose: body.pose, setRef } });
         json(res, 202, { id: job.id });
       } catch (e) { failEnqueue(res, e); }
     },

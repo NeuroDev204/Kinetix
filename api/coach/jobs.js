@@ -499,7 +499,8 @@ async function execute(job) {
       ...(job.kind === 'adapt' ? { activeId: job.activeId, focus: payload.focus } : {}),
       ...attempt.result,
       ...(job.mealId ? { mealId: job.mealId } : {}),
-      ...(job.kind === 'english-summary' && job.english ? { day: job.english.day } : {})
+      ...(job.kind === 'english-summary' && job.english ? { day: job.english.day } : {}),
+      ...(job.kind === 'form' && job.form?.setRef ? { setRef: job.form.setRef } : {})
     };
     return finish(job, { outcome: 'ready', pending, ...via });
   } finally {

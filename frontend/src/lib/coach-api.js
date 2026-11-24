@@ -113,7 +113,7 @@ export const requestMeal = (...a) => asked(_requestMeal)(...a)
 const _requestEnglishSummary = async (day, transcript) => api('/api/coach/english-summary', { method: 'POST', body: JSON.stringify({ transcript, day, lang: getLang() }) })
 export const requestEnglishSummary = (...a) => asked(_requestEnglishSummary)(...a)
 // Kinetix: the form of one set video (the form job). 409 media-missing until the video is on the server.
-const _requestForm = async ({ exerciseId, exerciseName, set, summary, media }) => api('/api/coach/form', { method: 'POST', body: JSON.stringify({ media: { hash: media.hash, mime: media.mime }, exercise: { id: exerciseId, name: exerciseName }, set: { w: set?.w ?? null, r: set?.r ?? null }, pose: summary || null, lang: getLang() }) })
+const _requestForm = async ({ exerciseId, exerciseName, set, summary, media, setRef }) => api('/api/coach/form', { method: 'POST', body: JSON.stringify({ media: { hash: media.hash, mime: media.mime }, exercise: { id: exerciseId, name: exerciseName }, set: { w: set?.w ?? null, r: set?.r ?? null }, pose: summary || null, setRef: setRef || null, lang: getLang() }) })
 export const requestForm = (...a) => asked(_requestForm)(...a)
 // A question in the chat, answered in words (the `ask` job). The session running here goes along
 // (lib/coach-context.js): the server never holds it.
