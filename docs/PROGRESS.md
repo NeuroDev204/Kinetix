@@ -40,3 +40,28 @@ Real smoke, phase 1 (`KINETIX_REAL_AI=1 node api/scripts/kinetix-smoke.mjs`):
 - [x] 3.6 Voice tools, persona and Talk button — ca6986c — frontend vitest, locales, build
 - [x] 3.7 English log and summary job — f76915f — api npm test, frontend vitest, locales
 - [x] 3.8 E2E live trainer — channel only (see ledger); 5 E2E specs pass
+
+## Phase 4: form analysis (kinetix/p4-form) — merged to main
+
+- [x] 4.1 Joint angles and rep counting — d9b7fed — pose tests
+- [x] 4.2 Pose runner (MediaPipe) — b970144 — frontend vitest, build
+- [x] 4.3 Form job — ff11b34 — api npm test, asset and docs checks
+- [x] 4.4 Analyse after the set, speak the feedback — ae03fef — api npm test, frontend vitest, build
+- [~] 4.5 E2E form and offline — flow 6 passes but asserts 'offline' during a live workout (BLOCKERS); flow 7 not written
+
+## Phase 5: iOS and the home server (kinetix/p5-ios)
+
+- [x] 5.1 iOS identity and entitlements — e632a00 — identity check, native localizations, live-activity tests
+- [~] 5.2 Unsigned IPA workflow — workflows written; CI run blocked until the branch is on main (BLOCKERS)
+- [x] 5.3 Windows setup script and guide — 3407fab — script tests (pwsh parse skipped: not installed here)
+- [ ] 5.4 Final verification and handover — local gate green (below); merge to main and the IPA run wait for a decision
+
+## Done (draft, pending the merge and the CI run)
+
+Spec §10.4 acceptance criteria:
+- ✗ Every §10.2 flow green on Linux: flows 1, 2, 3, 4 and the live channel pass; flow 5 covers the channel only (no workout-screen log); flow 6 asserts the live-workout 'offline' path; flow 7 not written (BLOCKERS).
+- ✗ IPA downloadable from Actions and installable by USB: not verified (CI run needs the merge to main; Swift not compiled here).
+- ✗ §10.3 checklist ticked by the user: not started; human items are in docs/HUMAN_TODO.md.
+- ✗ Meal photo logged under a minute: not measured.
+
+Real-key smoke: run once in Phase 1 (Gemini returned 503, Qwen unreachable). Not repeated.
