@@ -28,4 +28,4 @@
 Real smoke, phase 1 (`KINETIX_REAL_AI=1 node api/scripts/kinetix-smoke.mjs`):
 - FAIL compatible-text unreachable (laptop Ollama not reachable from this machine; expected)
 - FAIL gemini-vision timeout (gemini-3.8-flash answered HTTP 503 to a direct call; the adapter retried until its budget ran out)
-- [~] 2.8 E2E flows — partial: flows 2 (meal photo) and 4 (quota) pass with `npm run e2e` (3 specs pass incl. smoke); flows 1 and 3 not written, see docs/BLOCKERS.md
+- [x] 2.8 E2E flows — 2 for this run; 5 E2E specs pass (meals, onboarding, review, routing, smoke)
