@@ -32,8 +32,6 @@ lcov.info
 /stats/
 frontend/bundle-size.json
 
-# Local planning notes
-docs/superpowers/plans/
 
 # Python and Kotlin build leftovers (scripts/, the Android build)
 __pycache__/

@@ -115,8 +115,9 @@ iPhone (app Kinetix, Capacitor)  ──Tailscale──▶  Laptop Windows ở nh
 - Chụp ảnh → ảnh lưu theo ngày qua media-store có sẵn → job `meal` (Gemini vision) trả về các món:
   `{ name, grams, kcal, protein, carbs, fat }`.
 - Người dùng sửa được số gram; macro **tỉ lệ thuận** theo gram (không gọi lại AI).
-- Dữ liệu: `S.meals[YYYY-MM-DD] = [{ id, at, photo: <hash>, items[], edited }]`, có timestamp từng trường như mọi dữ liệu openGym
-  để `lib/sync-merge.js` và `api/sync-stamps.js` gộp đúng (sửa cả hai phía, kèm test parity).
+- Dữ liệu: `S.meals[<id>] = { d: 'YYYY-MM-DD', at, m: <bản ghi media đầy đủ>, items[], edited, _ts }` (theo id, không phải mảng theo ngày:
+  mảng không có `_ts` nên đồng bộ hai máy sẽ mất bữa; `m` phải là bản ghi media đầy đủ như `dayPhotos`, nếu chỉ là hash thì server xoá file).
+  Thêm vào `STAMPED_MAPS`/`OWN_MERGE` ở `lib/sync-merge.js` và `api/sync-stamps.js`, media refs cả hai phía, `NEVER` trong `api/tokens.js`.
 - Màn hình hiện: ảnh hôm nay, tổng so với mục tiêu, thực đơn tuần.
 - **Không dùng cơ sở dữ liệu dinh dưỡng ở bản đầu** *(quyết định của Claude)*: chưa có bảng món Việt mở nào tải được;
   OpenNutrition (ODbL, ~300k thực phẩm) mạnh về nguyên liệu, yếu về món Việt. Gemini tự ước lượng.
@@ -129,7 +130,8 @@ iPhone (app Kinetix, Capacitor)  ──Tailscale──▶  Laptop Windows ở nh
 
 ### 6.2 Nói tiếng Anh live (người dùng đã chọn: trong lúc tập + chat tự do)
 
-- Gemini Live API, WebSocket từ app, model native audio (builder chọn model id hiện hành).
+- Gemini Live API (`gemini-3.8-live`, v1beta, `BidiGenerateContentConstrained` + token tạm), WebSocket thô từ app (không nhúng SDK vào bundle);
+  server tạo token bằng `@google/genai` `authTokens.create`. Vision dùng `gemini-3.8-flash`.
 - **Theo lượt, giống âm thông báo** (người dùng chọn: nghe nhạc bằng tai nghe Bluetooth; khi PT nói thì nhạc nhỏ lại,
   xong thì về âm lượng cũ):
   - Mỗi lượt: bật audio session `playAndRecord` + `duckOthers` → nói/nghe → tắt session với `notifyOthersOnDeactivation`
@@ -146,6 +148,7 @@ iPhone (app Kinetix, Capacitor)  ──Tailscale──▶  Laptop Windows ở nh
   - Cần plugin native nhỏ (mở rộng `RestAlertPlugin.swift`, nơi đang quản lý audio session) để chuyển session; WebView không tự làm được.
   - Giữa các lượt đóng WebSocket để tiết kiệm free tier; dùng session resumption để PT nhớ ngữ cảnh khi mở lại.
 - Âm thanh: micro → PCM 16 kHz qua AudioWorklet; phát PCM 24 kHz trả về.
+- MediaPipe `@mediapipe/tasks-vision@1.2.3` chỉ có WASM SIMD → iOS tối thiểu **16.4**.
 - Lời dặn hệ thống: PT nói tiếng Anh, thân thiện, cho phép chat mọi chủ đề, **sửa lỗi nhẹ** (nhắc lại câu đúng một lần rồi đi tiếp) *(quyết định của Claude)*.
   Biết buổi tập hôm nay: dùng cùng payload `today` mà job `adapt` đang gửi.
 - Tool (function calling), nối vào action có sẵn của store: `log_set`, `start_rest`, `next_exercise`, `get_today`.
@@ -172,11 +175,11 @@ iPhone (app Kinetix, Capacitor)  ──Tailscale──▶  Laptop Windows ở nh
 - `App.xcodeproj` đã commit chỉ có target `App`; widget, đồng hồ, bộ tải animation, Garmin được CI thêm vào bằng
   `frontend/ios/ci/add-*.rb`. Kinetix **không chạy các script đó** (giữ `add-ui-tests.rb` nếu cần).
 - Bỏ Live Activity biên dịch trong App (`WorkoutActivity.swift` và lời gọi từ `lib/live-activity.js`).
-- Sửa `App/App.entitlements`: bỏ associated-domains, NFC, app-groups. HealthKit: thử ký; không được thì bỏ.
+- Sửa `App/App.entitlements`: bỏ associated-domains, NFC (Apple ID miễn phí không ký được); giữ HealthKit, App Groups (được phép), đổi group id sang id riêng.
 - Đổi bundle id riêng (ví dụ `com.<tên>.kinetix`) và tên hiển thị "Kinetix".
 - Job GitHub Actions macOS mới, chỉ chạy tay (`workflow_dispatch`) để tiết kiệm phút:
   `npm run build:mobile` → `xcodebuild archive CODE_SIGNING_ALLOWED=NO` → đóng `Payload/App.app` thành `.ipa` → artifact.
-- Cài: **Sideloader** trên Linux qua USB, Apple ID miễn phí; 7 ngày cài lại, dữ liệu giữ nguyên (cùng bundle id).
+- Cài: **Impactor** (github.com/claration/impactor, có Flathub; dự phòng: Dadoum/Sideloader) trên Linux qua USB, Apple ID miễn phí; 7 ngày cài lại, dữ liệu giữ nguyên (cùng bundle id).
 - Quyền: thêm mô tả micro/camera (`NSMicrophoneUsageDescription`, `NSCameraUsageDescription`) nếu chưa có.
 
 ### 6.5 Vòng phát triển hằng ngày
@@ -233,7 +236,7 @@ và provider giả `api/coach/fixture-cli.mjs` cho mọi kết quả job của C
 
 - Media giả cho T3: Chromium `--use-fake-device-for-media-stream --use-file-for-fake-audio-capture=<wav>
   --use-file-for-fake-video-capture=<y4m>`; ảnh bữa ăn/dáng người là file mẫu trong `e2e/fixtures/`.
-- Test T3 chạy trên Chromium; WebKit của Playwright chạy các luồng không cần micro/camera (gần Safari nhất có thể trên Linux).
+- Test T3 chỉ chạy trên Chromium (đăng nhập passkey bằng virtual authenticator của Chromium; WebKit không có).
 - Toàn bộ T1–T3 phải xanh trước khi sang task kế tiếp; các bộ kiểm tra CI có sẵn của openGym
   (`check-locales`, `check-source-strings --strict`, `build-coach-assets --check`, `build-api-docs --check`) cũng phải xanh.
 
@@ -255,7 +258,7 @@ và provider giả `api/coach/fixture-cli.mjs` cho mọi kết quả job của C
 
 ### 10.3 Checklist thủ công trên iPhone (T6)
 
-- Cài IPA bằng Sideloader qua USB; app mở, ghép đôi với laptop qua Tailscale.
+- Cài IPA bằng Impactor qua USB; app mở, ghép đôi với laptop qua Tailscale.
 - Nghe nhạc bằng tai nghe Bluetooth → bấm Talk → nhạc nhỏ lại → PT trả lời → nhạc về âm lượng cũ.
 - Micro hybrid: có tai nghe → nói qua micro tai nghe; tháo tai nghe giữa lượt → chuyển micro điện thoại, lượt không ngắt.
 - Khóa màn hình giữa buổi → PT live còn hoạt động hay không (ghi lại kết quả; rủi ro §8).
@@ -289,4 +292,4 @@ Người dùng muốn spec và plan đủ lớn để Claude tự làm liên t�
 **Việc chỉ người dùng làm được (gom về cuối, ghi trong `docs/HUMAN_TODO.md`)**
 - Dựng laptop Windows: Claude viết sẵn script PowerShell + hướng dẫn (Docker Desktop, Ollama, Tailscale, `tailscale serve`);
   người dùng chạy.
-- Cài IPA bằng Sideloader + Apple ID; checklist §10.3.
+- Cài IPA bằng Impactor + Apple ID; checklist §10.3.
