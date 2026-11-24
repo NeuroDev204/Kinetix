@@ -120,6 +120,7 @@ const SettingsRoute = lazyView(() => import('./views/Settings.jsx').then(m => ({
 // The app tour's overlay (components/Tour.jsx): fetched when it opens, never before.
 const loadTour = () => import('./components/Tour.jsx')
 const Tour = lazy(loadTour)
+const Nutrition = lazy(() => import('./views/Nutrition.jsx'))
 let viewsPrefetched = false
 const prefetchViews = () => {
   if (viewsPrefetched) return
@@ -425,6 +426,7 @@ function Shell() {
           AI Coach module is on, so a deep link from a notification lands somewhere sane rather
           than on the catch-all. With the module off, Home is the sane place. */}
       {isOn(S, 'coach') && <Route path="/coach" element={<CoachChat />} />}
+      {isOn(S, 'coach') && <Route path="/nutrition" element={<Nutrition />} />}
       {isOn(S, 'coach') && <Route path="/coach/intake" element={<CoachIntake />} />}
       {isOn(S, 'coach') && <Route path="/coach/proposal" element={<Navigate to="/coach" replace />} />}
       {isOn(S, 'coach') && <Route path="/coach/setup" element={<CoachSetup />} />}
