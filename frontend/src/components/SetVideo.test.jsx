@@ -39,7 +39,8 @@ function renderTop() {
   const sheet = useUI.getState().sheets.at(-1)
   return render(sheet.render(() => useUI.getState().closeSheet(sheet.id)))
 }
-const settle = async () => { for (let i = 0; i < 8; i++) await act(async () => { await new Promise(r => setTimeout(r, 0)) }) }
+// Waits for the video store write to land: 8 zero-ms ticks were too few under full-suite load (the write is async).
+const settle = async () => { for (let i = 0; i < 20; i++) await act(async () => { await new Promise(r => setTimeout(r, 10)) }) }
 async function choose(host, which = 'capture') {
   const input = which === 'capture' ? host.querySelector('input[type="file"][capture]') : host.querySelector('input[type="file"]:not([capture])')
   Object.defineProperty(input, 'files', { value: [new File(['x'], 'VID_0001.MOV', { type: 'video/quicktime' })], configurable: true })

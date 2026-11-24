@@ -144,6 +144,8 @@ export function stateMediaRefs(state) {
   for (const e of Array.isArray(state.sounds) ? state.sounds : []) if (isObj(e) && isObj(e.m)) out.push(e.m)
   // Your own photo or video on a built-in exercise (lib/ex-media.js): exMedia[<id>] = { m, show, _ts }.
   if (isObj(state.exMedia)) for (const e of Object.values(state.exMedia)) if (isObj(e) && isObj(e.m)) out.push(e.m)
+  // Meal photos (Kinetix nutrition): meals[id].m.
+  if (isObj(state.meals)) for (const e of Object.values(state.meals)) if (isObj(e) && isObj(e.m)) out.push(e.m)
   // The profile picture (lib/avatar.js): avatar = { m } (a preset has no file).
   if (isObj(state.avatar) && isObj(state.avatar.m)) out.push(state.avatar.m)
   return out

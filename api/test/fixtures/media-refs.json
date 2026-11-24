@@ -1202,6 +1202,28 @@
         "1111111111111111111111111111111111111111111111111111111111111111",
         "2222222222222222222222222222222222222222222222222222222222222222"
       ]
+    },
+    {
+      "name": "a meal photo (Kinetix nutrition)",
+      "state": {
+        "meals": {
+          "m1": {
+            "d": "2026-11-24",
+            "at": 1,
+            "m": {
+              "hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+              "mime": "image/jpeg"
+            },
+            "items": [],
+            "status": "done",
+            "edited": false,
+            "_ts": 1
+          }
+        }
+      },
+      "expect": [
+        "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      ]
     }
   ]
 }

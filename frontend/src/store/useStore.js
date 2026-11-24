@@ -91,6 +91,8 @@ const gainedWorkoutMedia = (prev, next) => {
   return workoutMediaHashes(next).some(h => !had.has(h))
 }
 export const DEF = {
+  // Kinetix: meal photos (meals[id] = { d, at, m, items, status, edited, _ts }), English practice logs (english[day]), the AI nutrition plan (plain setting).
+  meals: {}, english: {}, nutritionPlan: null,
   unit: 'kg', restSec: 90, restPauseSec: 15, sound: true, soundOnSilent: false, vibrateOnSilent: false, timerFlash: false, timedSetOvertime: false, keepAwake: true, lang: 'en',
   // accent: the old iOS green on purpose. A loaded copy that never picked one (saved before accents,
   // a server document, a backup) keeps the green it always had; a new profile starts on the
@@ -383,7 +385,7 @@ function loadState() {
 // weigh-ins and custom exercises. A custom exercise is all a new guest may have made — with its
 // photo or video, which the server counts as unreferenced until the state that names it lands —
 // so a profile created from such a copy takes it at once, like one holding a workout.
-const hasData = st => !!((st.workouts || []).length || (st.routines || []).length || (st.bodyweight || []).length || (st.customEx || []).length || (st.measurements || []).length || Object.values(st.exAliases || {}).some(v => Array.isArray(v) && v.length))
+const hasData = st => !!((st.workouts || []).length || Object.values(st.meals || {}).some(m => m && m.d) || (st.routines || []).length || (st.bodyweight || []).length || (st.customEx || []).length || (st.measurements || []).length || Object.values(st.exAliases || {}).some(v => Array.isArray(v) && v.length))
 
 // Decide whether a pulled account state may replace the local saved state. A local active workout
 // is deliberately carried forward: the server stores completed/saved state, while the in-progress

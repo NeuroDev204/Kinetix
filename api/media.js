@@ -99,7 +99,7 @@ export function mediaLimits(env = process.env) {
 // `avatar: true`: it keeps the profile picture (state.avatar.m, v1.4.5). Served like every other
 // file, from the caller's own folder only, so nobody else (an admin included) can fetch it. An
 // older server would sweep it, so there the picture stays on the device that set it.
-export const mediaConfig = l => ({ imageMB: l.imageMB, gifMB: l.gifMB, videoMB: l.videoMB, videoSec: l.videoSec, audioMB: l.audioMB, quotaMB: l.quotaMB, workouts: true, days: true, sets: true, sounds: true, avatar: true, builtin: true });
+export const mediaConfig = l => ({ imageMB: l.imageMB, gifMB: l.gifMB, videoMB: l.videoMB, videoSec: l.videoSec, audioMB: l.audioMB, quotaMB: l.quotaMB, workouts: true, days: true, sets: true, sounds: true, avatar: true, meals: true, builtin: true });
 
 /* ---------------------------------------------------------------- errors */
 
@@ -336,6 +336,8 @@ export function referencedHashes(state) {
   // Your own photo or video on a built-in exercise (frontend lib/ex-media.js, v1.4.5):
   // exMedia[<exercise id>] = { m, show, _ts }, a removed one only { _ts }.
   if (isObj(state.exMedia)) for (const e of Object.values(state.exMedia)) if (isObj(e) && isObj(e.m)) ref(e.m);
+  // Meal photos (Kinetix nutrition): meals[id].m.
+  if (isObj(state.meals)) for (const e of Object.values(state.meals)) if (isObj(e) && isObj(e.m)) ref(e.m);
   // The profile picture (frontend lib/avatar.js): avatar = { m }, a 256 px square.
   if (isObj(state.avatar) && isObj(state.avatar.m)) ref(state.avatar.m);
   return out;

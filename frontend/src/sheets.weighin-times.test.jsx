@@ -48,9 +48,10 @@ afterEach(() => { act(() => { mounted.splice(0).forEach(root => root.unmount()) 
 describe('the log sheet', () => {
   it('starts on now, and a second weigh-in today joins the first', () => {
     bwSheet()
+    const before = timeOf(Date.now())
     const log = mountTopSheet()
     const time = log.querySelector('input[type="time"]')
-    expect(time.value).toBe(timeOf(Date.now()))
+    expect([before, timeOf(Date.now())]).toContain(time.value)   // the clock minute may roll over during the test
     setValue(time, '06:30')
     act(() => { button(log, 'Save').click() })
     bwSheet()
