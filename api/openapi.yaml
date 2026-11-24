@@ -4215,6 +4215,32 @@ paths:
           description: 'The photo ref is missing or invalid (error is invalid).'
         '409':
           description: 'The photo is not on the server yet (error is media-missing).'
+  /api/kinetix/live-token:
+    post:
+      tags: [coach]
+      operationId: postKinetixLiveToken
+      summary: Mint a single-use token for a Gemini Live session
+      description: |
+        Returns a short-lived, single-use token the phone uses to open the live socket, plus the socket
+        address. The API key stays on the server. Needs a signed-in profile that gave Coach consent and an
+        instance with a live route. 429 `quota` when the free tier is spent.
+      responses:
+        '200':
+          description: The token, its model, its expiry (ms) and the socket address.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [token, model, expiresAt, wsUrl]
+                properties:
+                  token: { type: string }
+                  model: { type: string }
+                  expiresAt: { type: integer }
+                  wsUrl: { type: string }
+        '401': { description: Not signed in. }
+        '403': { description: No Coach consent yet. }
+        '429': { description: The provider's free-tier quota is spent (error is quota). }
+        '503': { description: No live route is configured (error is no-live). }
   /api/coach/ask:
     post:
       tags: [coach]

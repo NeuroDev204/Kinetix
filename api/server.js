@@ -12,6 +12,7 @@ import {
 } from '@simplewebauthn/server';
 import webpush from 'web-push';
 import * as coachConfig from './coach/config.js';
+import { kinetixRoutes } from './kinetix/live-token.js';
 import * as coachJobs from './coach/jobs.js';
 import { coachRoutes } from './coach/routes.js';
 import { startCadence } from './coach/cadence.js';
@@ -3604,6 +3605,8 @@ const routes = {
   // them: they are closures over db and SECRET, and passing them in keeps that module free of
   // a cycle. Every one of them is inert while the feature is unconfigured.
   ...coachRoutes({ json, readBody, readSession, requireAdmin }),
+  // Kinetix: the Gemini Live token. Consent is read from the profile's own state.
+  ...kinetixRoutes({ json, readBody, readSession, cfgStore: coachConfig, credentialFor: coachConfig.credentialFor, consented: uid => !!readState(uid)?.coach?.consent?.agreedAt }),
 
   /* ---------- integrations ---------- */
   // integrations/routes.js, handed the same helpers. With INTEGRATIONS unset they answer an empty
