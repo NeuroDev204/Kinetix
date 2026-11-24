@@ -106,7 +106,7 @@
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Used to save the pictures you make in openGym, like your workout card or a progress comparison, to Photos. openGym can only add pictures, never see your library.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Used to record the sound of a video you take of an exercise you add yourself or of a set you film, and the voice clips you record for the rest timer.</string>
+	<string>Kinetix uses the microphone for clips and for talking to your trainer.</string>
 	<key>BAAppGroupID</key>
 	<string>group.ch.opengym.app</string>
 	<key>BAHasManagedAssetPacks</key>
@@ -125,6 +125,7 @@
 	     Bluetooth, and a set logged on it reaches the phone in the pocket too, as the Apple Watch's
 	     do. Only used once a Garmin was picked. -->
 	<array>
+		<string>audio</string>
 		<string>fetch</string>
 		<string>processing</string>
 		<string>bluetooth-central</string>

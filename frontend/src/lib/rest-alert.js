@@ -16,6 +16,7 @@ import { t } from './i18n-core.js'
 import { argb } from './format.js'
 import { accentPair } from './accent.js'
 import { MOBILE, nativePlatform } from './mobile.js'
+import { voiceTurnActive } from './voice-session.js'
 import { REST_SOUNDS } from './rest-sounds.js'
 
 export const REST_ALERT_ID = 42
@@ -202,6 +203,8 @@ export function toneNative(kind, { onSilent = false, at = 0 } = {}) {
 // `pitch` 0.5 to 2. An app from before v1.4.5's voice picker ignores both.
 export function speakNative(text, { lang = '', rate = 1, pitch = 1, voice = '', onSilent = false, flush = false } = {}) {
   if (!MOBILE || !text) return Promise.resolve(false)
+  // A voice turn owns the audio session: no cue reconfigures it mid-turn (Kinetix, voice-session.js).
+  if (voiceTurnActive()) return Promise.resolve(false)
   return restPlugin()
     .then(plugin => (plugin ? plugin.RestAlert.speak({ text: String(text), lang: String(lang || ''), rate: Number(rate) || 1, pitch: Number(pitch) || 1, voice: String(voice || ''), onSilent: onSilent === true, flush: flush === true }).then(() => true) : false))
     .catch(() => false)
