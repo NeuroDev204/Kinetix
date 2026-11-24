@@ -249,9 +249,10 @@ export const SHARED_ACCOUNT_REFUSAL =
  * Refusals are terminal by design (Duarte, PR-1 constraints): no job is enqueued, rather than a
  * job that runs on somebody else's subscription behind a dismissible warning.
  */
-export function credentialFor(uid) {
+export function credentialFor(uid, provider = null) {
   const cfg = load();
-  if (cfg.provider === 'fixture') return { ok: true, auth: null, mode: cfg.authMode };
+  const p = provider || cfg.provider;
+  if (p === 'fixture') return { ok: true, auth: null, mode: cfg.authMode };
 
   if (cfg.authMode === 'profile') {
     const rec = loadProfileAuth(uid);
@@ -261,16 +262,16 @@ export function credentialFor(uid) {
   }
 
   // instance mode
-  const bound = boundUidFor(cfg);
+  const bound = boundUidFor(cfg, p);
   if (bound && bound !== uid) {
     return { ok: false, reason: 'shared-account', message: SHARED_ACCOUNT_REFUSAL, mode: 'instance' };
   }
-  const rec = authFor(cfg);
+  const rec = authFor(cfg, p);
   const auth = rec && rec.data ? decrypt(rec.data) : null;
   if (!auth || !auth.token) {
     // An endpoint that takes no key (a model on the LAN) is connected without one. Only when
     // nothing was ever filed — a filed key that fails to decrypt is still a failure.
-    if (providerMeta(cfg).keyOptional && !rec) return { ok: true, auth: null, type: null, account: null, mode: 'instance' };
+    if ((PROVIDERS[p] || PROVIDERS.fixture).keyOptional && !rec) return { ok: true, auth: null, type: null, account: null, mode: 'instance' };
     return { ok: false, reason: 'no-credential', mode: 'instance' };
   }
   return { ok: true, auth, type: rec.type, account: rec.account || null, mode: 'instance' };
@@ -348,7 +349,7 @@ export function publicConfig() {
  */
 export function jobEnv(jobDir, resolved) {
   const cfg = load();
-  const meta = providerMeta(cfg);
+  const meta = PROVIDERS[(resolved && resolved.provider) || cfg.provider] || PROVIDERS.fixture;
   const env = { PATH: '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin', HOME: jobDir, TMPDIR: jobDir };
   const auth = resolved && resolved.auth;
   if (auth && auth.token) {
