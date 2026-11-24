@@ -29,3 +29,13 @@ Real smoke, phase 1 (`KINETIX_REAL_AI=1 node api/scripts/kinetix-smoke.mjs`):
 - FAIL compatible-text unreachable (laptop Ollama not reachable from this machine; expected)
 - FAIL gemini-vision timeout (gemini-3.8-flash answered HTTP 503 to a direct call; the adapter retried until its budget ran out)
 - [x] 2.8 E2E flows — 2 for this run; 5 E2E specs pass (meals, onboarding, review, routing, smoke)
+
+## Phase 3: live English PT (kinetix/p3-live)
+
+- [x] 3.1 Live token endpoint — 8764113 — api npm test, frontend vitest
+- [x] 3.2 Live protocol (pure) — 9a332e4 (committed with 3.3) — frontend live tests
+- [x] 3.3 Audio I/O — 9a332e4 — live tests, build
+- [x] 3.4 Live session with turns — 53e4c53 — live tests, build
+- [ ] 3.5 Native voice audio session — JS done (voice-session.js, speak guard); Swift part blocked, see docs/BLOCKERS.md
+- [x] 3.6 Voice tools, persona and Talk button — ca6986c — frontend vitest, locales, build
+- [x] 3.7 English log and summary job — f76915f — api npm test, frontend vitest, locales
