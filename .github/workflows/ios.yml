@@ -10,7 +10,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, labeled]
   push:
-    branches: [main, stores, watch]
+    branches: [main]
     paths:
       - 'frontend/**'
       - '.github/workflows/ios.yml'
