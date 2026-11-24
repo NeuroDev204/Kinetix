@@ -109,6 +109,9 @@ export const requestPhysique = (...a) => asked(_requestPhysique)(...a)
 // Kinetix: the dishes in one meal photo already on the server (the meal job). 409 media-missing until it arrives.
 const _requestMeal = async (mealId, ref) => api('/api/coach/meal', { method: 'POST', body: JSON.stringify({ media: { hash: ref.hash, mime: ref.mime }, lang: getLang(), mealId: mealId || null }) })
 export const requestMeal = (...a) => asked(_requestMeal)(...a)
+// Kinetix: the day's English practice summarised (the english-summary job). The answer comes back as a pending proposal tagged with the day.
+const _requestEnglishSummary = async (day, transcript) => api('/api/coach/english-summary', { method: 'POST', body: JSON.stringify({ transcript, day, lang: getLang() }) })
+export const requestEnglishSummary = (...a) => asked(_requestEnglishSummary)(...a)
 // A question in the chat, answered in words (the `ask` job). The session running here goes along
 // (lib/coach-context.js): the server never holds it.
 // Routines from the library that match the question (lib/routine-library.js), so the Coach can

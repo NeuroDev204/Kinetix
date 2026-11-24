@@ -7,6 +7,9 @@ import { systemInstruction } from './persona.js'
 import { openMic, createPlayer } from './audio-io.js'
 import { beginVoiceTurn, endVoiceTurn } from '../voice-session.js'
 import { api } from '../api.js'
+import { useStore } from '../../store/useStore.js'
+import { appendTranscript } from './english-log.js'
+import { todayISO } from '../format.js'
 
 let session = null
 const subs = new Set()
@@ -27,6 +30,7 @@ export function liveTrainer({ todaySummary, unit }) {
       tools: TOOL_DECLARATIONS,
       model: 'gemini-3.8-live',
       onToolCall: handleToolCall,
+      onTranscript: ev => { const now = Date.now(); const day = todayISO(); useStore.getState().update(s => { appendTranscript(s, day, ev, now) }) },
       onState: (s, why) => publish(s, why),
       audio: { openMic, createPlayer },
       voice: { beginVoiceTurn, endVoiceTurn },

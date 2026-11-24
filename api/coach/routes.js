@@ -137,6 +137,18 @@ export function coachRoutes({ json, readBody, readSession, requireAdmin }) {
       } catch (e) { failEnqueue(res, e); }
     },
 
+    // Kinetix: the day's English practice, summarised. A transcript is required.
+    'POST /api/coach/english-summary': async (req, res) => {
+      const user = guard(req, res); if (!user) return;
+      const body = await readBody(req);
+      const transcript = typeof body.transcript === 'string' ? body.transcript.trim() : '';
+      if (!transcript) return json(res, 400, { error: 'invalid' });
+      try {
+        const job = jobs.enqueue(user.id, { kind: 'english-summary', lang: body.lang, english: { transcript, day: body.day } });
+        json(res, 202, { id: job.id });
+      } catch (e) { failEnqueue(res, e); }
+    },
+
     // One workout, read closely. Nothing to apply — the card is kept in the user's log.
     'POST /api/coach/debrief': async (req, res) => {
       const user = guard(req, res); if (!user) return;

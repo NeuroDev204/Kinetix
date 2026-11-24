@@ -218,4 +218,14 @@ export const MEAL_SCHEMA = {
   required: ['coach_contract', 'items']
 };
 
-export const SCHEMAS = { meal: MEAL_SCHEMA, physique: PHYSIQUE_SCHEMA, review: REVIEW_SCHEMA, create: CREATE_SCHEMA, refine: CREATE_SCHEMA, debrief: DEBRIEF_SCHEMA, ask: ASK_SCHEMA, adapt: ADAPT_SCHEMA };
+export const ENGLISH_SUMMARY_SCHEMA = {
+  type: 'object',
+  properties: {
+    coach_contract: { type: 'integer' },
+    mistakes: { type: 'array', items: { type: 'object', properties: { said: STR, better: STR }, required: ['said', 'better'] } },
+    newWords: STRINGS
+  },
+  required: ['coach_contract', 'mistakes', 'newWords']
+};
+
+export const SCHEMAS = { 'english-summary': ENGLISH_SUMMARY_SCHEMA, meal: MEAL_SCHEMA, physique: PHYSIQUE_SCHEMA, review: REVIEW_SCHEMA, create: CREATE_SCHEMA, refine: CREATE_SCHEMA, debrief: DEBRIEF_SCHEMA, ask: ASK_SCHEMA, adapt: ADAPT_SCHEMA };

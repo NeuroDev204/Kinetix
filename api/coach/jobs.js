@@ -255,6 +255,8 @@ export function enqueue(uid, opts) {
     body: opts.kind === 'physique' && opts.body ? opts.body : null,
     // Kinetix meal job: the app's meal id, so the answer can be written back to that meal.
     mealId: opts.kind === 'meal' && opts.mealId ? String(opts.mealId).slice(0, 40) : null,
+    // Kinetix English summary: the day's transcript (text the person said) and the day it is for.
+    english: opts.kind === 'english-summary' && opts.english ? { transcript: String(opts.english.transcript || '').slice(0, 20000), day: String(opts.english.day || '').slice(0, 10) } : null,
     note: clampMessage(opts.note),
     refine: clampMessage(opts.refine),
     // A question's running session, sent by the phone (the server never holds `active`). Kept on
@@ -394,6 +396,8 @@ async function execute(job) {
     ? physiqueLib.buildPhysique({ handle: handleFor(job.uid), lang: job.lang, body: job.body })
     : job.kind === 'meal'
     ? physiqueLib.buildMeal({ handle: handleFor(job.uid), lang: job.lang })
+    : job.kind === 'english-summary'
+    ? physiqueLib.buildEnglish({ handle: handleFor(job.uid), lang: job.lang, transcript: job.english?.transcript, day: job.english?.day })
     : payloadLib.build(S, {
     handle: handleFor(job.uid),
     kind: job.kind,
@@ -490,7 +494,8 @@ async function execute(job) {
       ...(kind !== job.kind ? { from: job.kind } : {}),
       ...(job.kind === 'adapt' ? { activeId: job.activeId, focus: payload.focus } : {}),
       ...attempt.result,
-      ...(job.mealId ? { mealId: job.mealId } : {})
+      ...(job.mealId ? { mealId: job.mealId } : {}),
+      ...(job.kind === 'english-summary' && job.english ? { day: job.english.day } : {})
     };
     return finish(job, { outcome: 'ready', pending, ...via });
   } finally {

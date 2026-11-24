@@ -38,6 +38,13 @@ export function cleanMediaRef(m) {
 }
 
 /** The payload a meal job sends: the day and the language. The photo travels apart, as for physique. */
+/** The English summary's payload: the transcript of the day (the person's own words, read by the model once) and the day. */
+export function buildEnglish({ handle, lang, transcript, day, now = Date.now() }) {
+  const text = String(transcript || '').trim().slice(0, 20000);
+  if (!text) throw new Error('empty transcript');
+  return { coach_contract: 1, task: 'english-summary', meta: { profile: handle, lang: lang || 'en', today: day || new Date(now).toISOString().slice(0, 10) }, transcript: text };
+}
+
 export function buildMeal({ handle, lang, now = Date.now() }) {
   const d = new Date(now);
   const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;

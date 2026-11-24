@@ -328,7 +328,7 @@ main.api-main .lead { color: var(--fg-2); max-width: 58ch; margin: 14px 0 0; fon
   <p class="api-facts">
     <span>OpenAPI 3.1.0</span>
     <span>openGym v1.4.5</span>
-    <span>180 endpoints</span>
+    <span>181 endpoints</span>
     <span>AGPL-3.0-or-later</span>
   </p>
 
@@ -3105,6 +3105,48 @@ main.api-main .lead { color: var(--fg-2); max-width: 58ch; margin: 14px 0 0; fon
   <div class="prow rrow">
     <span class="r-code s5">503</span>
     <span class="p-desc">No live route is configured (error is no-live).</span>
+  </div>
+    </div>
+  </div>
+</details>
+
+<details class="ep" id="op-postCoachEnglishSummary">
+  <summary>
+    <span class="m post">POST</span>
+    <span class="ep-path"><code>/api/coach/english-summary</code></span>
+    <span class="ep-chev" aria-hidden="true"></span>
+    <span class="ep-sum">Summarise a day of English practice</span>
+  </summary>
+  <div class="ep-body">
+<p>Queues an \<code>english-summary\</code> job: the day's transcript of what the person said to the live trainer. The answer is a pending proposal with the mistakes (said and better) and the new words. Nothing is changed on the phone except what the person keeps.</p>
+    <p class="ep-auth"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Requires a session: the cookie set at sign-in, or <code>Authorization: Bearer &lt;token&gt;</code> from mobile-app pairing.</span></p>
+
+<p class="ep-h">Request body <span class="p-hint">(JSON)</span></p><div class="ptab">
+  <div class="prow">
+    <span class="p-name">transcript<em class="p-req" title="required">required</em></span>
+    <span class="p-type">string <span class="p-hint">(&le; 20000 chars)</span></span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">day</span>
+    <span class="p-type">string</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">lang</span>
+    <span class="p-type">string</span>
+    <span class="p-desc"></span>
+  </div>
+</div>
+    <p class="ep-h">Responses</p>
+    <div class="ptab">
+  <div class="prow rrow">
+    <span class="r-code s2">202</span>
+    <span class="p-desc">Queued. The id is the job.<span class="r-sig">{ id: string }</span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">400</span>
+    <span class="p-desc">The transcript is missing or empty (error is invalid).</span>
   </div>
     </div>
   </div>

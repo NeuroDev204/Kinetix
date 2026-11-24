@@ -4241,6 +4241,39 @@ paths:
         '403': { description: No Coach consent yet. }
         '429': { description: The provider's free-tier quota is spent (error is quota). }
         '503': { description: No live route is configured (error is no-live). }
+  /api/coach/english-summary:
+    post:
+      tags: [coach]
+      operationId: postCoachEnglishSummary
+      summary: Summarise a day of English practice
+      description: |
+        Queues an \`english-summary\` job: the day's transcript of what the person said to the live trainer.
+        The answer is a pending proposal with the mistakes (said and better) and the new words. Nothing is
+        changed on the phone except what the person keeps.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [transcript]
+              properties:
+                transcript: { type: string, maxLength: 20000 }
+                day: { type: string, pattern: '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' }
+                lang:
+                  type: string
+                  pattern: '^[A-Za-z]{2,3}([-_][A-Za-z0-9]{2,8})?$'
+      responses:
+        '202':
+          description: Queued. The id is the job.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [id]
+                properties:
+                  id: { type: string }
+        '400': { description: 'The transcript is missing or empty (error is invalid).' }
   /api/coach/ask:
     post:
       tags: [coach]

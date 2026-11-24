@@ -898,6 +898,7 @@ export default function Stats() {
     workouts.length > 0 && <Row key="b" title={t('Structural balance')} subtitle={t('See which lift is holding back the rest.')} accessory="chevron" className="stats-link" onClick={() => nav('/structural-balance')} />,
     // Kinetix: meals and calories against the target (views/Nutrition.jsx).
     on('coach') && <Row key="n" title={t('Nutrition')} subtitle={t('Meals, calories and the week\'s meal plan.')} accessory="chevron" className="stats-link" onClick={() => nav('/nutrition')} />,
+    on('coach') && <Row key="e" title={t('English practice')} subtitle={t('What you said to your trainer, the mistakes, the new words.')} accessory="chevron" className="stats-link" onClick={() => nav('/english')} />,
     // Every note in one feed (views/Journal.jsx): workouts, sets, exercises, check-ins, days off.
     <Row key="j" title={t('Journal')} subtitle={t('Every note you wrote, in one place.')} accessory="chevron" className="stats-link" onClick={() => nav('/journal')} />,
     <Row key="t" title={t('Tools')} subtitle={t('1RM table, RPE load, DOTS, BMI, body fat, pace.')} accessory="chevron" className="stats-link" onClick={() => nav('/tools')} />,

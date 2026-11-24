@@ -5953,4 +5953,11 @@ export default {
   "Trainer unavailable": "Trainer unavailable",
   "Your trainer is talking": "Your trainer is talking",
   "Live trainer limit reached, try later": "Live trainer limit reached, try later",
+  "Could not summarise that day. Try again later.": "Could not summarise that day. Try again later.",
+  "English practice": "English practice",
+  "New words": "New words",
+  "No English practice yet. Talk to your trainer during a workout and it shows up here.": "No English practice yet. Talk to your trainer during a workout and it shows up here.",
+  "Summarise this day": "Summarise this day",
+  "Summarising…": "Summarising…",
+  "What you said to your trainer, the mistakes, the new words.": "What you said to your trainer, the mistakes, the new words.",
 }

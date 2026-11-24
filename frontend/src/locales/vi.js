@@ -5899,4 +5899,11 @@ export default {
   "Trainer unavailable": "Huấn luyện viên không khả dụng",
   "Your trainer is talking": "Huấn luyện viên đang nói",
   "Live trainer limit reached, try later": "Đã hết hạn mức huấn luyện viên trực tiếp, thử lại sau",
+  "Could not summarise that day. Try again later.": "Không tóm tắt được ngày này. Thử lại sau.",
+  "English practice": "Luyện tiếng Anh",
+  "New words": "Từ mới",
+  "No English practice yet. Talk to your trainer during a workout and it shows up here.": "Chưa có luyện tiếng Anh. Nói chuyện với huấn luyện viên trong buổi tập, nội dung sẽ hiện ở đây.",
+  "Summarise this day": "Tóm tắt ngày này",
+  "Summarising…": "Đang tóm tắt…",
+  "What you said to your trainer, the mistakes, the new words.": "Điều bạn nói với huấn luyện viên, các lỗi và từ mới.",
 };

@@ -993,6 +993,20 @@ export function validatePhysique(data) {
   return { ok: true, proposal: { coach_contract: 1, physique: { bodyFatRange: [p.bodyFatRange[0], p.bodyFatRange[1]], notes: p.notes, focusAreas: p.focusAreas } } };
 }
 
+/* =============================== English summary (Kinetix) =============================== */
+
+export function validateEnglish(data) {
+  if (!data || typeof data !== 'object') return fail(['the answer was not an object']);
+  const errors = [];
+  if (data.coach_contract !== 1) errors.push('coach_contract must be 1');
+  const m = data.mistakes;
+  if (!Array.isArray(m) || m.length > 20 || m.some(x => !x || typeof x.said !== 'string' || typeof x.better !== 'string' || x.said.length > 200 || x.better.length > 200)) errors.push('mistakes: up to 20 items, each with said and better of at most 200 characters');
+  const w = data.newWords;
+  if (!Array.isArray(w) || w.length > 20 || w.some(x => typeof x !== 'string' || x.length > 40)) errors.push('newWords: up to 20 strings of at most 40 characters');
+  if (errors.length) return fail(errors);
+  return { ok: true, proposal: { coach_contract: 1, mistakes: m.map(x => ({ said: x.said, better: x.better })), newWords: w } };
+}
+
 /* =============================== meal (Kinetix) =============================== */
 
 /** The dishes in a meal photo. An empty list is an answer only with a note saying why. */

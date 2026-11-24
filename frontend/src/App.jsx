@@ -121,6 +121,7 @@ const SettingsRoute = lazyView(() => import('./views/Settings.jsx').then(m => ({
 const loadTour = () => import('./components/Tour.jsx')
 const Tour = lazy(loadTour)
 const Nutrition = lazy(() => import('./views/Nutrition.jsx'))
+const English = lazy(() => import('./views/English.jsx'))
 let viewsPrefetched = false
 const prefetchViews = () => {
   if (viewsPrefetched) return
@@ -427,6 +428,7 @@ function Shell() {
           than on the catch-all. With the module off, Home is the sane place. */}
       {isOn(S, 'coach') && <Route path="/coach" element={<CoachChat />} />}
       {isOn(S, 'coach') && <Route path="/nutrition" element={<Nutrition />} />}
+      {isOn(S, 'coach') && <Route path="/english" element={<English />} />}
       {isOn(S, 'coach') && <Route path="/coach/intake" element={<CoachIntake />} />}
       {isOn(S, 'coach') && <Route path="/coach/proposal" element={<Navigate to="/coach" replace />} />}
       {isOn(S, 'coach') && <Route path="/coach/setup" element={<CoachSetup />} />}
