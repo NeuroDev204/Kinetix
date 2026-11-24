@@ -190,3 +190,9 @@ store requires for a feature (such as Google Play services' Wearable Data Layer 
 system frameworks), without the Corresponding Source of those libraries. Everything else stays
 under the AGPL: openGym's own source, including the code that talks to these libraries, must
 remain available as the license requires.
+
+## Pose model — `pose_landmarker_lite.task` (Kinetix)
+
+The body pose model used for form analysis (`frontend/public/models/pose_landmarker_lite.task`) is
+MediaPipe's PoseLandmarker Lite, from `litert-community/MediaPipe-PoseLandmarker-Lite` on Hugging Face,
+licensed Apache-2.0. The MediaPipe web runtime (`@mediapipe/tasks-vision`, 1.2.3) is Apache-2.0 too.
