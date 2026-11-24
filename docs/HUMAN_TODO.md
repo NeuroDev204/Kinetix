@@ -12,3 +12,12 @@ Things only you can do. The run never waits on these.
 - [ ] Windows laptop, once: from the repo folder run `powershell -ExecutionPolicy Bypass -File scripts\kinetix\windows-setup.ps1` (Task 5.3; guide in docs/KINETIX_SETUP.md)
 - [ ] Windows laptop: keep it awake while plugged in (Power settings, "Sleep when plugged in": Never)
 - [ ] iPhone: install the unsigned IPA with Impactor over USB; re-sign every 7 days (guide in docs/KINETIX_SETUP.md, section 5)
+
+## Checklist trên iPhone (spec §10.3)
+
+- [ ] Cài IPA bằng Impactor qua USB; app mở, ghép đôi với laptop qua Tailscale.
+- [ ] Nghe nhạc bằng tai nghe Bluetooth → bấm Talk → nhạc nhỏ lại → PT trả lời → nhạc về âm lượng cũ. (Lưu ý: phiên âm thanh native chưa làm, xem docs/BLOCKERS.md mục 3.5.)
+- [ ] Micro hybrid: có tai nghe → nói qua micro tai nghe; tháo tai nghe giữa lượt → chuyển micro điện thoại, lượt không ngắt. (Cùng lý do ở trên.)
+- [ ] Khóa màn hình giữa buổi → PT live còn hoạt động hay không (ghi lại kết quả; rủi ro §8).
+- [ ] Quay video set → nhận xét nghe được trong tai nghe. (Phân tích video khi đang tập đang chờ quyết định, xem docs/BLOCKERS.md mục 4.5.)
+- [ ] 7 ngày sau cài lại → dữ liệu còn nguyên.

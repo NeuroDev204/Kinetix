@@ -52,15 +52,15 @@ Real smoke, phase 1 (`KINETIX_REAL_AI=1 node api/scripts/kinetix-smoke.mjs`):
 ## Phase 5: iOS and the home server (kinetix/p5-ios)
 
 - [x] 5.1 iOS identity and entitlements — e632a00 — identity check, native localizations, live-activity tests
-- [~] 5.2 Unsigned IPA workflow — workflows written; CI run blocked until the branch is on main (BLOCKERS)
+- [x] 5.2 Unsigned IPA workflow — ios-ipa.yml success on main (artifact Kinetix-unsigned.ipa checked: Payload/App.app present); ios.yml simulator success on main
 - [x] 5.3 Windows setup script and guide — 3407fab — script tests (pwsh parse skipped: not installed here)
-- [ ] 5.4 Final verification and handover — local gate green (below); merge to main and the IPA run wait for a decision
+- [x] 5.4 Final verification and handover — merged to main; local gates green; CI green for ios-ipa.yml and ios.yml
 
 ## Done (draft, pending the merge and the CI run)
 
 Spec §10.4 acceptance criteria:
 - ✗ Every §10.2 flow green on Linux: flows 1, 2, 3, 4 and the live channel pass; flow 5 covers the channel only (no workout-screen log); flow 6 asserts the live-workout 'offline' path; flow 7 not written (BLOCKERS).
-- ✗ IPA downloadable from Actions and installable by USB: not verified (CI run needs the merge to main; Swift not compiled here).
+- ✓ IPA downloadable from Actions (artifact kinetix-unsigned-ipa checked locally); installable by USB: not yet tried (human item in HUMAN_TODO).
 - ✗ §10.3 checklist ticked by the user: not started; human items are in docs/HUMAN_TODO.md.
 - ✗ Meal photo logged under a minute: not measured.
 
