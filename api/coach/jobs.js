@@ -428,7 +428,8 @@ async function execute(job) {
     if (!a) return { ok: false, errorClass: 'off' };
     const refusal = privilegeRefusal(a);
     if (refusal) return { ok: false, errorClass: 'unprivileged', detail: refusal };
-    const env = cfgStore.jobEnv(jobDir || os.tmpdir(), cfgStore.credentialFor(job.uid, provider));
+    // The provider is named with the credential, so the key lands in the env it is read from.
+    const env = cfgStore.jobEnv(jobDir || os.tmpdir(), { ...cfgStore.credentialFor(job.uid, provider), provider });
     // A text job on the local model gets the shorter budget, so a sleeping laptop falls back
     // in minutes rather than the full job budget.
     const timeoutMs = reason === 'text' && cfg.routing?.textTimeoutMs ? cfg.routing.textTimeoutMs : TIMEOUT_MS;

@@ -115,10 +115,12 @@ test('a Gemini quota error on a vision job fails once, with no second attempt', 
   writeState(DIR, uid, sampleState());
   routed();
   let geminiCalls = 0;
-  stub(gemini, async () => { geminiCalls++; return { code: 1, text: '', stderr: '429 quota exceeded' }; });
+  let sentKey = null;
+  stub(gemini, async opts => { geminiCalls++; sentKey = opts.env && opts.env.GEMINI_API_KEY; return { code: 1, text: '', stderr: '429 quota exceeded' }; });
   jobs.enqueue(uid, { kind: 'physique', media: { hash: 'a'.repeat(64), mime: 'image/jpeg' } });
   await settle(uid);
   assert.equal(geminiCalls, 1);
+  assert.equal(sentKey, 'g-key', 'the routed provider gets its own key in the job env');
   const last = jobs.readUser(uid).history.at(-1);
   assert.equal(last.outcome, 'failed');
   assert.equal(last.errorClass, 'quota');
