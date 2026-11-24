@@ -15,8 +15,14 @@ import { useUI } from '../store/useUI.js'
 import { t } from '../lib/i18n.js'
 import { DAYN } from '../lib/format.js'
 import { EXDB } from '../lib/exercises.js'
-import { emptyCoach, coachAvailable, hasConsent, CONSENT_VERSION, CATEGORY_TEXT, appendChat, defaultTrainingDays } from '../lib/coach.js'
-import { requestPlan, disclosure, JOB_ERRORS, isDeclined, coachVia } from '../lib/coach-api.js'
+import { emptyCoach, coachAvailable, hasConsent, CONSENT_VERSION, CATEGORY_TEXT, BUILT_IN_CATEGORIES, appendChat, defaultTrainingDays } from '../lib/coach.js'
+import { requestPlan, requestPhysique, disclosure, JOB_ERRORS, isDeclined, coachVia } from '../lib/coach-api.js'
+import { useMediaPicker } from '../components/CustomMediaField.jsx'
+import { fileProgressPhoto, serverTakesDayPhotos } from '../lib/day-photos.js'
+import { syncMedia } from '../lib/media-sync.js'
+import { logWeighIn } from '../lib/bodyweight.js'
+import { initialTarget, ageOf } from '../lib/nutrition.js'
+import { todayISO } from '../lib/format.js'
 import { consentTarget, allowAi } from '../lib/coach-consent.js'
 import { OptionalRows } from '../components/CoachSees.jsx'
 import { DEMO } from '../lib/demo.js'
@@ -72,7 +78,7 @@ export default function CoachIntake() {
   // changed and CONSENT_VERSION moved) reads the new terms and goes back to the Coach. Without
   // this the redirect from the chat replayed all seven questions and ended in a new plan request.
   const [reconsentOnly] = useState(() => !editing && !hasConsent(S) && !!S.coach?.profile)
-  const STEPS = reconsentOnly ? ['consent'] : [...(needConsent ? ['consent'] : []), 'goal', 'experience', 'days', 'length', 'equipment', 'limits', 'extras']
+  const STEPS = reconsentOnly ? ['consent'] : [...(needConsent ? ['consent'] : []), 'goal', 'body', 'photo', 'experience', 'days', 'length', 'equipment', 'limits', 'extras']
   const [step, setStep] = useState(0)
   const [busy, setBusy] = useState(false)
   const [p, setP] = useState(() => ({
@@ -82,6 +88,9 @@ export default function CoachIntake() {
     ...(S.coach?.profile || {})
   }))
   const set = patch => setP(v => ({ ...v, ...patch }))
+  // Kinetix: the body photo for the estimate, filed as a progress photo and sent with the body facts.
+  const { pick } = useMediaPicker()
+  const [photoNote, setPhotoNote] = useState(null)
 
   const gate = useCoachGate()
   useEffect(() => { if (gate.known && !gate.ok) nav('/home', { replace: true }) }, [gate.known, gate.ok])
@@ -89,8 +98,27 @@ export default function CoachIntake() {
 
   const key = STEPS[step]
   const last = step === STEPS.length - 1
-  const canNext = key === 'goal' ? !!p.goal : key === 'experience' ? !!p.experience : key === 'length' ? p.sessionMin >= 10 : true
-  const optional = ['equipment', 'limits', 'extras'].includes(key)
+  const canNext = key === 'body' ? bodyFactsOk(p) : key === 'goal' ? !!p.goal : key === 'experience' ? !!p.experience : key === 'length' ? p.sessionMin >= 10 : true
+  const optional = ['photo', 'equipment', 'limits', 'extras'].includes(key)
+
+  // Kinetix: the body photo is filed for today and sent for a body-fat estimate. A refusal here is
+  // a note, not a blocked intake: the answers are kept and the photo can be added later.
+  const onPhoto = async ev => {
+    const file = ev.target.files && ev.target.files[0]
+    ev.target.value = ''
+    if (!file) return
+    const got = await pick(file)
+    if (!got) return
+    const { user, config } = useStore.getState()
+    update(st => { fileProgressPhoto(st, todayISO(), got, { canDay: serverTakesDayPhotos(user, config) }) })
+    try {
+      await syncMedia({ force: true })
+      await requestPhysique(got, bodyFactsOf(p))
+      setPhotoNote(t('The estimate is on its way. It will show on your plan.'))
+    } catch (e) {
+      if (!isDeclined(e)) setPhotoNote(JOB_ERRORS[e.data?.code] || e.message || t('Could not send the photo for the estimate'))
+    }
+  }
 
   const next = () => (last ? finish() : setStep(step + 1))
   const back = () => (step ? setStep(step - 1) : nav(editing ? '/coach' : '/plan'))
@@ -110,10 +138,18 @@ export default function CoachIntake() {
   const finish = async () => {
     // `??`, not `||`: only a missing answer takes the default. Nought is an answer, and the clamp
     // turns it into one day like every other count below the floor.
-    const profile = { ...p, daysPerWeek: Math.min(7, Math.max(1, p.daysPerWeek ?? 3)) }
+    const daysPerWeek = Math.min(7, Math.max(1, p.daysPerWeek ?? 3))
+    // Kinetix: the starting calorie and macro target from the body facts and the training days.
+    const target = bodyFactsOk(p) ? initialTarget({ sex: p.sex, kg: p.weightKg, cm: p.heightCm, age: ageOf(p.birthYear), daysPerWeek, rateGoal: rateGoalOf(p) }) : null
+    const profile = { ...p, daysPerWeek, ...(target ? { target } : {}) }
     update(s => {
       const c = (s.coach = s.coach || emptyCoach())
       c.profile = profile
+      if (target) {
+        s.sex = p.sex; s.birthYear = p.birthYear; s.heightCm = p.heightCm; s.targetW = p.goalKg; s.rateGoal = rateGoalOf(p)
+        logWeighIn(s, p.weightKg)
+        if (!s.nutritionPlan) s.nutritionPlan = { ...target, why: 'initial', mealPlan: [], at: Date.now() }
+      }
       // The conversation opens with the answers — rendered from the profile, so an edit later
       // is reflected rather than duplicated. One intake line whoever is writing it: a first-timer
       // whose plan request failed presses the button again, and must not open the thread with
@@ -170,6 +206,28 @@ export default function CoachIntake() {
         <div className="ob-choices">
           {GOALS.map(([v, text, icon]) => { const [title, sub] = text(); return <Choice key={v} on={p.goal === v} icon={icon} title={title} sub={sub} onClick={() => set({ goal: v })} /> })}
         </div>
+      </>}
+
+      {key === 'body' && <>
+        <div className="ob-eyebrow">{t('Your body')}</div>
+        <h1 className="ob-h">{t('A few facts for the estimate')}</h1>
+        <p className="ob-p">{t('Used for your calorie target and the body-fat estimate. Stays on your own server.')}</p>
+        <div className="ob-choices">
+          <Choice on={p.sex === 'm'} icon="person" title={t('Male')} onClick={() => set({ sex: 'm' })} />
+          <Choice on={p.sex === 'f'} icon="person" title={t('Female')} onClick={() => set({ sex: 'f' })} />
+        </div>
+        <label className="ob-field">{t('Birth year')}<input className="input" type="number" inputMode="numeric" value={p.birthYear ?? ''} onChange={e => set({ birthYear: numOf(e.target.value) })} /></label>
+        <label className="ob-field">{t('Height (cm)')}<input className="input" type="number" inputMode="decimal" value={p.heightCm ?? ''} onChange={e => set({ heightCm: numOf(e.target.value) })} /></label>
+        <label className="ob-field">{t('Weight (kg)')}<input className="input" type="number" inputMode="decimal" value={p.weightKg ?? ''} onChange={e => set({ weightKg: numOf(e.target.value) })} /></label>
+        <label className="ob-field">{t('Goal weight (kg)')}<input className="input" type="number" inputMode="decimal" value={p.goalKg ?? ''} onChange={e => set({ goalKg: numOf(e.target.value) })} /></label>
+      </>}
+
+      {key === 'photo' && <>
+        <div className="ob-eyebrow">{t('Body photo')}</div>
+        <h1 className="ob-h">{t('A photo for the estimate')}</h1>
+        <p className="ob-p">{t('Optional. Stand relaxed, in good light. The Coach estimates a body-fat range from it and keeps the photo with your progress photos.')}</p>
+        <input type="file" accept="image/*" capture="user" onChange={onPhoto} aria-label={t('Body photo')} />
+        {photoNote && <div className="ob-hint">{photoNote}</div>}
       </>}
 
       {key === 'experience' && <>
@@ -256,6 +314,13 @@ export default function CoachIntake() {
   </div>
 }
 
+// Kinetix body facts: a number from a text field (empty or not a number is null), the facts the
+// estimate and the target need, the rate that goes with the goal, and the payload the photo sends.
+const numOf = v => { const n = Number(String(v).replace(',', '.')); return v === '' || !Number.isFinite(n) ? null : n }
+const bodyFactsOk = p => !!p.sex && p.birthYear >= 1920 && p.birthYear <= 2020 && p.heightCm >= 100 && p.heightCm <= 250 && p.weightKg >= 30 && p.weightKg <= 300 && p.goalKg >= 30 && p.goalKg <= 300
+const rateGoalOf = p => (p.goalKg < p.weightKg ? -0.5 : p.goalKg > p.weightKg ? 0.25 : 0)
+const bodyFactsOf = p => ({ sex: p.sex, age: ageOf(p.birthYear), heightCm: p.heightCm, weightKg: p.weightKg, goalKg: p.goalKg })
+
 function Choice({ on, icon, title, sub, onClick }) {
   return <button className={'ob-choice' + (on ? ' on' : '')} onClick={onClick}>
     <Icon name={icon} />
@@ -279,7 +344,7 @@ function Consent({ onAgree, onDecline }) {
     <p className="ob-p">{t('It designs your plan from a few answers and adjusts it from what you actually log. It never changes anything without your say-so, and you can undo every change.')}</p>
     <div className="ob-sub" style={{ marginTop: 0 }}>{t('What it reads')}</div>
     <div className="ob-consent">
-      {(info?.categories || Object.keys(CATEGORY_TEXT)).map(k => {
+      {(info?.categories || BUILT_IN_CATEGORIES).map(k => {
         const [title, sub] = CATEGORY_TEXT[k]?.() || [k, '']
         return <div key={k} className="ob-consent-row"><Icon name="check" /><div><b>{title}</b><span>{sub}</span></div></div>
       })}

@@ -5863,4 +5863,18 @@ export default {
   "Preview on": "Xem trước trên",
   // 1.4.5 UX round, P2: timed holds in the finish summary (next hold is shorter)
   "shorter": "ngắn hơn",
+  "A body photo or a meal photo you send for an estimate. Only the photos you choose, and only when you ask.": "Ảnh cơ thể hoặc ảnh bữa ăn bạn gửi để ước tính. Chỉ những ảnh bạn chọn, và chỉ khi bạn yêu cầu.",
+  "A few facts for the estimate": "Vài thông tin để ước tính",
+  "A photo for the estimate": "Một ảnh để ước tính",
+  "Birth year": "Năm sinh",
+  "Body photo": "Ảnh cơ thể",
+  "Could not send the photo for the estimate": "Không gửi được ảnh để ước tính",
+  "Goal weight (kg)": "Cân nặng mục tiêu (kg)",
+  "Height (cm)": "Chiều cao (cm)",
+  "Optional. Stand relaxed, in good light. The Coach estimates a body-fat range from it and keeps the photo with your progress photos.": "Không bắt buộc. Đứng thả lỏng, dưới ánh sáng tốt. Huấn luyện viên ước tính khoảng tỉ lệ mỡ từ ảnh và giữ ảnh cùng ảnh tiến độ của bạn.",
+  "Photos you choose to have analysed": "Ảnh bạn chọn để phân tích",
+  "The estimate is on its way. It will show on your plan.": "Ước tính đang được xử lý. Kết quả sẽ hiện trên kế hoạch của bạn.",
+  "Used for your calorie target and the body-fat estimate. Stays on your own server.": "Dùng để tính mục tiêu calo và ước tính tỉ lệ mỡ. Chỉ lưu trên máy chủ của bạn.",
+  "Weight (kg)": "Cân nặng (kg)",
+  "Your body": "Cơ thể của bạn",
 };

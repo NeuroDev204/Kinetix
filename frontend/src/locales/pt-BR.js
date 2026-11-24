@@ -4326,6 +4326,20 @@ export const PT_BR_OVERRIDES = {
   "iOS ends it after 8 hours, and a swipe removes it. It comes back with your next set.": "O iOS encerra depois de 8 horas, e um deslize remove. Volta com sua próxima série.",
   "Android Settings, Apps, Kinetix, Notifications.": "Configurações do Android, Apps, Kinetix, Notificações.",
   "Follows the main page. Switch this on to pick the details and buttons for this type yourself.": "Segue a página principal. Ative isto para escolher você mesmo os detalhes e os botões deste tipo.",
+  "A body photo or a meal photo you send for an estimate. Only the photos you choose, and only when you ask.": "A body photo or a meal photo you send for an estimate. Only the photos you choose, and only when you ask.",
+  "A few facts for the estimate": "A few facts for the estimate",
+  "A photo for the estimate": "A photo for the estimate",
+  "Birth year": "Birth year",
+  "Body photo": "Body photo",
+  "Could not send the photo for the estimate": "Could not send the photo for the estimate",
+  "Goal weight (kg)": "Goal weight (kg)",
+  "Height (cm)": "Height (cm)",
+  "Optional. Stand relaxed, in good light. The Coach estimates a body-fat range from it and keeps the photo with your progress photos.": "Optional. Stand relaxed, in good light. The Coach estimates a body-fat range from it and keeps the photo with your progress photos.",
+  "Photos you choose to have analysed": "Photos you choose to have analysed",
+  "The estimate is on its way. It will show on your plan.": "The estimate is on its way. It will show on your plan.",
+  "Used for your calorie target and the body-fat estimate. Stays on your own server.": "Used for your calorie target and the body-fat estimate. Stays on your own server.",
+  "Weight (kg)": "Weight (kg)",
+  "Your body": "Your body",
 }
 
 export default { ...pt, ...PT_BR_OVERRIDES }

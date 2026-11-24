@@ -5897,4 +5897,18 @@ export default {
   "Preview on": "预览位置",
   // 1.4.5 UX round, P2: timed holds in the finish summary (next hold is shorter)
   "shorter": "缩短一点",
+  "A body photo or a meal photo you send for an estimate. Only the photos you choose, and only when you ask.": "A body photo or a meal photo you send for an estimate. Only the photos you choose, and only when you ask.",
+  "A few facts for the estimate": "A few facts for the estimate",
+  "A photo for the estimate": "A photo for the estimate",
+  "Birth year": "Birth year",
+  "Body photo": "Body photo",
+  "Could not send the photo for the estimate": "Could not send the photo for the estimate",
+  "Goal weight (kg)": "Goal weight (kg)",
+  "Height (cm)": "Height (cm)",
+  "Optional. Stand relaxed, in good light. The Coach estimates a body-fat range from it and keeps the photo with your progress photos.": "Optional. Stand relaxed, in good light. The Coach estimates a body-fat range from it and keeps the photo with your progress photos.",
+  "Photos you choose to have analysed": "Photos you choose to have analysed",
+  "The estimate is on its way. It will show on your plan.": "The estimate is on its way. It will show on your plan.",
+  "Used for your calorie target and the body-fat estimate. Stays on your own server.": "Used for your calorie target and the body-fat estimate. Stays on your own server.",
+  "Weight (kg)": "Weight (kg)",
+  "Your body": "Your body",
 }

@@ -15,7 +15,7 @@ import { createRoot } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import CoachIntake from './CoachIntake.jsx'
 import { requestPlan, disclosure } from '../lib/coach-api.js'
-import { CONSENT_VERSION, CATEGORY_TEXT } from '../lib/coach.js'
+import { CONSENT_VERSION, CATEGORY_TEXT, BUILT_IN_CATEGORIES } from '../lib/coach.js'
 import { setLang } from '../lib/i18n.js'
 import { consentTarget, hasAiConsent, aiConsents, _resetAiConsent } from '../lib/coach-consent.js'
 
@@ -51,6 +51,7 @@ vi.mock('react-router-dom', () => ({
 }))
 vi.mock('../lib/coach-api.js', () => ({
   requestPlan: vi.fn(() => Promise.resolve({})),
+  requestPhysique: vi.fn(() => Promise.resolve({ id: 'job-1' })),
   disclosure: vi.fn(() => Promise.resolve(null)),
   JOB_ERRORS: { busy: 'the app’s busy line' },
   ensureAiConsent: vi.fn(() => Promise.resolve(true)),
@@ -99,6 +100,15 @@ const typeIn = (el, value) => act(() => {
   el.dispatchEvent(new Event('input', { bubbles: true }))
 })
 
+// The body facts Continue waits for (the Kinetix body screen): a 25-year-old man, 175 cm, 70 kg, goal 65.
+const fieldOf = label => [...host.querySelectorAll('label.ob-field')].find(l => l.textContent.startsWith(label))?.querySelector('input')
+const fillBody = () => {
+  typeIn(fieldOf('Birth year'), String(new Date().getFullYear() - 25))
+  typeIn(fieldOf('Height'), '175')
+  typeIn(fieldOf('Weight'), '70')
+  typeIn(fieldOf('Goal weight'), '65')
+}
+
 // Walk the flow to a named screen, answering only what Continue is actually waiting for — so
 // a test that already made its own choice keeps it.
 const walkTo = target => {
@@ -106,6 +116,7 @@ const walkTo = target => {
     if (eyebrow() === 'Before we start') { tap('button', 'I understand'); continue }
     if (footBtn().disabled) {
       if (eyebrow() === 'Your goal') tap('.ob-choice', 'Build muscle')
+      else if (eyebrow() === 'Your body') { tap('.ob-choice', 'Male'); fillBody() }
       else if (eyebrow() === 'Experience') tap('.ob-choice', 'Training regularly')
     }
     cont()
@@ -154,7 +165,7 @@ describe('CoachIntake — the consent screen', () => {
     expect(Date.parse(mocks.S.coach.consent.agreedAt)).not.toBeNaN()
     expect(mocks.S.coach.profile).toBe(null)          // nothing else written yet
     expect(eyebrow()).toBe('Your goal')
-    expect(all('.ob-dot')).toHaveLength(7)
+    expect(all('.ob-dot')).toHaveLength(9)
   })
 
   it('agreeing is also the yes for the provider it names, so the data-sharing sheet does not ask again', async () => {
@@ -266,7 +277,7 @@ describe('CoachIntake — the consent screen', () => {
   it('names every category in the app’s language', async () => {
     // The screen used to pass these lines to t() as variables, which check-source-strings cannot
     // see, and eight of the ten had no translation in any pack.
-    const english = Object.values(CATEGORY_TEXT).map(text => text())
+    const english = BUILT_IN_CATEGORIES.map(k => CATEGORY_TEXT[k]())
     const de = (await import('../locales/de.js')).default
     await setLang('de')
     try {
@@ -295,7 +306,7 @@ describe('CoachIntake — the two answers that gate the flow', () => {
     expect(footBtn().disabled).toBe(false)
     expect(host.querySelector('.ob-hint')).toBe(null)
     cont()
-    expect(eyebrow()).toBe('Experience')
+    expect(eyebrow()).toBe('Your body')
   })
 
   it('will not leave the experience screen until one is picked', () => {
@@ -332,6 +343,9 @@ describe('CoachIntake — the two answers that gate the flow', () => {
       expect(choices()).toEqual(goals.map(([title, sub]) => [de[title], de[sub]]))
       act(() => host.querySelector('.ob-choice').click())
       cont()
+      act(() => host.querySelectorAll('.ob-choice')[0].click()); fillBody()
+      cont()
+      cont()
       expect(choices()).toEqual(experience.map(([title, sub]) => [de[title], de[sub]]))
     } finally { await setLang('en') }
   })
@@ -363,6 +377,10 @@ describe('CoachIntake — moving around', () => {
     act(() => host.querySelector('.iconbtn').click())
     expect(eyebrow()).toBe('Experience')
     act(() => host.querySelector('.iconbtn').click())
+    expect(eyebrow()).toBe('Body photo')
+    act(() => host.querySelector('.iconbtn').click())
+    expect(eyebrow()).toBe('Your body')
+    act(() => host.querySelector('.iconbtn').click())
     expect(eyebrow()).toBe('Your goal')
     act(() => host.querySelector('.iconbtn').click())
     expect(eyebrow()).toBe('Before we start')
@@ -378,7 +396,7 @@ describe('CoachIntake — moving around', () => {
     expect(mocks.nav).toHaveBeenCalledWith('/coach')
   })
 
-  it('Skip is offered only on the three optional screens, and never on the last one', () => {
+  it('Skip is offered only on the four optional screens, and never on the last one', () => {
     mount(); walkTo('Your goal')
     expect(host.querySelector('.ob-skip')).toBe(null)
     walkTo('Equipment')
@@ -395,11 +413,11 @@ describe('CoachIntake — moving around', () => {
   it('the dots count the seven questions and follow the one on screen', () => {
     mount(); walkTo('Your goal')
     const at = () => all('.ob-dot').findIndex(d => d.classList.contains('on'))
-    expect(all('.ob-dot')).toHaveLength(7)
+    expect(all('.ob-dot')).toHaveLength(9)
     expect(at()).toBe(0)
     walkTo('Schedule')
-    expect(at()).toBe(2)
-    expect(all('.ob-dot').filter(d => d.classList.contains('done'))).toHaveLength(2)
+    expect(at()).toBe(4)
+    expect(all('.ob-dot').filter(d => d.classList.contains('done'))).toHaveLength(4)
   })
 })
 

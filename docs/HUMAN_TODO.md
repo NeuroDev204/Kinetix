@@ -7,3 +7,4 @@ Things only you can do. The run never waits on these.
 - [ ] Check real free-tier limits at https://aistudio.google.com/rate-limit for gemini-3.8-flash and gemini-3.8-live
 - [ ] Install the IPA with Impactor and run the iPhone checklist (Task 5.4)
 - [ ] Set GEMINI_API_KEY in /home/neuro/Documents/Kinetix/.env (needed for the real-AI smoke test in Task 1.5; .env is git-ignored)
+- [ ] Translate the 14 Kinetix intake strings and the photo-category text in 23 locale packs (they are English for now; Vietnamese is done). Keys: "Your body", "A few facts for the estimate", "Body photo", "Photos you choose to have analysed" and the rest added in Task 2.5 (search for them in src/locales/vi.js).

@@ -80,8 +80,12 @@ export const CATEGORY_TEXT = {
   training: () => [t('Your logged training'), t('Sets you logged in the review window: weights, reps, times, effort ratings, how long sessions took, and your session notes.')],
   bodyweight: () => [t('Body weight'), t('Weigh-ins from the same window, and your goal weight if you set one.')],
   profile: () => [t('What you tell the Coach'), t('Your intake answers, including any limitations or injuries you describe.')],
-  prefs: () => [t('A few preferences'), t('Your unit, your language and which effort scale you log.')]
+  prefs: () => [t('A few preferences'), t('Your unit, your language and which effort scale you log.')],
+  // Kinetix: the photos the server analyses (a body photo, a meal photo), only the ones you choose.
+  media: () => [t('Photos you choose to have analysed'), t('A body photo or a meal photo you send for an estimate. Only the photos you choose, and only when you ask.')]
 }
+// The five the phone's own consent screen lists before the server says what it sends (the server adds 'media').
+export const BUILT_IN_CATEGORIES = ['plan', 'training', 'bodyweight', 'profile', 'prefs']
 // The categories each person switches on or off (api/coach/core/categories.js OPTIONAL_CATEGORIES).
 export const OPTIONAL_TEXT = {
   records: () => [t('Strength trends'), t('Estimated one-rep maxes of your main lifts over the last twelve weeks.')],
