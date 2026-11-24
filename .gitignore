@@ -54,3 +54,4 @@ frontend/ios/App/WatchCore/.build/
 /dist/
 .wrangler/
 .taste-skill/
+frontend/e2e/fixtures/squat-5reps.mp4
