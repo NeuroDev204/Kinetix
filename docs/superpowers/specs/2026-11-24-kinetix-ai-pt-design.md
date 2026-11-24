@@ -4,7 +4,7 @@ Ngày: 2026-11-24 · Trạng thái: chờ duyệt
 
 ## 1. Mục đích và lý do
 
-Kinetix là bản fork **dùng cá nhân, một người dùng** của [openGym](https://github.com/DuarteSantos8/openGym)
+Kinetix là bản sửa đổi **dùng cá nhân, một người dùng** của [openGym](https://github.com/DuarteSantos8/openGym)
 (AGPL-3.0, React 19 + Vite, server `node:http`, app iOS bằng Capacitor). Thêm vào đó một **AI PT cá nhân**:
 
 1. Tự tối ưu **lịch tập** và **lịch ăn** theo chính người dùng.
@@ -32,7 +32,7 @@ Không đăng App Store.
 - Cơ sở dữ liệu dinh dưỡng ở bản đầu (xem §6.1).
 - Nhận xét form realtime bằng camera trực tiếp.
 - Chấm điểm phát âm; buổi học tiếng Anh ngồi riêng.
-- Gửi PR ngược lên openGym; viết lại bằng React Native / Java / Go / Python.
+- Gửi PR ngược lên openGym; xoá `LICENSE`/`NOTICE.md`/dòng copyright (vi phạm AGPL); viết lại bằng React Native / Java / Go / Python.
 - Kiểm thử Android (không xoá, không đảm bảo).
 
 **Phản mục tiêu (làm xong mà vẫn coi là thất bại nếu…)**
@@ -48,14 +48,15 @@ Không đăng App Store.
   Ollama bản Windows dùng GPU, Tailscale. Laptop phải bật (tắt chế độ ngủ) thì Coach và đồng bộ mới chạy;
   app vẫn ghi tập offline và đồng bộ sau (openGym vốn local-first).
 - **Máy dev: máy Linux hiện tại** (không có Mac). Dev trỏ Coach tới Ollama trên laptop qua Tailscale.
-- Miễn phí: không phí Apple; GitHub repo **public** `NeuroDev204/Kinetix` (fork của openGym) → phút macOS không giới hạn. Không bao giờ commit `.env`, ảnh, video hay `./data`.
+- Miễn phí: không phí Apple; GitHub repo **public, độc lập** `NeuroDev204/Kinetix` (không phải fork; lịch sử mới bắt đầu từ một commit,
+  không còn remote openGym) → phút macOS không giới hạn. Cập nhật từ openGym sau này phải chép tay. Không bao giờ commit `.env`, ảnh, video hay `./data`.
 - **Gemini free tier.** Người dùng chấp nhận việc Google có thể dùng dữ liệu gửi lên (ảnh, video, giọng nói) để cải thiện sản phẩm.
   Phải chịu giới hạn lượt gọi của free tier → nói live theo lượt, không mở micro liên tục (§6.2).
 - Truy cập từ ngoài nhà qua **Tailscale**.
 - AI hybrid: **Qwen 3.5 4B** chạy local qua Ollama (`qwen3.5:4b`, có vision + tools) và **Gemini API** cho live talk, ảnh, video.
 - Apple ID miễn phí: app hết hạn sau 7 ngày, giới hạn số App ID và một số entitlement.
 
-- **Dữ liệu bài tập lấy từ chính fork**, không gọi nguồn ngoài: `catalogue/` (6.554 bài: JSON + ảnh 180 px + clip mp4),
+- **Dữ liệu bài tập lấy từ chính repo Kinetix** (đã chép từ openGym), không gọi nguồn ngoài: `catalogue/` (6.554 bài: JSON + ảnh 180 px + clip mp4),
   `routines/`, `api/coach/core/starter-plans.js`. Giao diện đã có tiếng Việt (`frontend/src/locales/vi.js`);
   tên bài tập chưa có tiếng Việt (`catalogue/i18n` không có `vi.json`) → giữ tiếng Anh *(quyết định của Claude)*.
 - **Giấy phép media bài tập (Gym visual, `NOTICE.md`)**: fork phi thương mại được giữ media 180 px nguyên vẹn kèm notice;
@@ -185,7 +186,9 @@ iPhone (app Kinetix, Capacitor)  ──Tailscale──▶  Laptop Windows ở nh
 
 ## 7. Thứ tự làm *(quyết định của Claude)*
 
-1. Fork (đã xong: `NeuroDev204/Kinetix`, public); dựng laptop Windows (Docker Desktop + openGym, Ollama `qwen3.5:4b`, Tailscale + `tailscale serve`); ghép đôi iPhone.
+1. Repo (đã xong: `NeuroDev204/Kinetix`, public, độc lập); **đổi thương hiệu** openGym → Kinetix: chuỗi giao diện, bundle id,
+   địa chỉ `opengym.ch` (routines index để `off`, callback OpenRouter), README; **giữ** `LICENSE`, `NOTICE.md`, dòng copyright;
+   xoá các workflow chỉ của openGym (đã tắt: Docker publish, demo Pages, mirror GitLab, CLA, weekly audit) và cấu hình Dependabot/Renovate; dựng laptop Windows (Docker Desktop + openGym, Ollama `qwen3.5:4b`, Tailscale + `tailscale serve`); ghép đôi iPhone.
 2. Định tuyến AI theo loại việc (Qwen / Gemini / dự phòng).
 3. Phần 6.1 (dáng người, bữa ăn, review tuần).
 4. Phần 6.2 (nói live).
@@ -203,7 +206,7 @@ iPhone (app Kinetix, Capacitor)  ──Tailscale──▶  Laptop Windows ở nh
 - **Laptop Windows tắt/ngủ** → không có Coach, không đồng bộ; app vẫn ghi tập.
 - **Qwen 4B có thể soạn lịch sai định dạng** → đã có repair + dự phòng Gemini.
 - Apple ID miễn phí có thể không ký được entitlement nào đó → bỏ entitlement đó.
-- Mỗi lần openGym upstream cập nhật, merge tay; tính năng mới nên nằm ở file mới để ít xung đột.
+- Không còn lịch sử chung với openGym → lấy bản vá của openGym phải chép tay; tính năng mới nên nằm ở file mới.
 
 ## 9. Để builder tự quyết
 
@@ -271,7 +274,7 @@ và provider giả `api/coach/fixture-cli.mjs` cho mọi kết quả job của C
 Người dùng muốn spec và plan đủ lớn để Claude tự làm liên tục không cần hỏi.
 
 **Chuẩn bị trước khi treo máy — đã xong 2026-11-24**
-1. Repo public `NeuroDev204/Kinetix` (fork GitHub, remote `upstream` = openGym); `gh` đã đăng nhập.
+1. Repo public độc lập `NeuroDev204/Kinetix`, một commit `Initial commit: Kinetix`; `gh` đã đăng nhập.
 2. `GEMINI_API_KEY` trong `/home/neuro/Documents/Kinetix/.env` (`.env` nằm trong `.gitignore` của openGym).
 3. Ollama trên laptop Windows: người dùng báo đã bật. Không truy cập được → T4 phần Qwen bỏ qua, không chặn.
 
@@ -279,7 +282,7 @@ Người dùng muốn spec và plan đủ lớn để Claude tự làm liên t�
 - Mỗi task: viết test trước → code → T1–T3 xanh → commit (một task một commit) → task kế.
 - Mỗi phase một nhánh; cuối phase chạy T4 nếu có key, rồi merge vào `main` của `NeuroDev204/Kinetix`.
 - Kẹt: sửa 3 lần không xanh → ghi `docs/BLOCKERS.md` (lỗi, đã thử gì, nghi ngờ gì) → chuyển sang task độc lập kế tiếp.
-- Không bao giờ: push lên openGym upstream, commit secret, xoá dữ liệu trong `./data`, chạy T4 trong vòng lặp.
+- Không bao giờ: push lên repo openGym, commit secret, xoá dữ liệu trong `./data`, chạy T4 trong vòng lặp.
 - Free tier: T4 tối đa một lần mỗi phase; mọi test khác dùng fixture.
 - Ghi tiến độ vào `docs/PROGRESS.md` sau mỗi task (task nào xong, test nào xanh, commit nào).
 
