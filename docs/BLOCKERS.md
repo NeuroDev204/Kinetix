@@ -19,3 +19,9 @@ Decision needed: (a) let the voice turn go through CueAudioLedger as a new shape
 A set video cannot be analysed while the workout is still running. The in-progress session (`active`) never syncs, and the server accepts a media upload only for hashes that a saved state references (api/media.js referencedHashes). So the clip is not on the server when the form job asks for it: `checkForm` answers 'offline' until the workout is saved.
 
 Decision needed: (a) let the server accept a set video for the live session (changes the media access rule; security-sensitive, so not done here), or (b) keep it and analyse after the workout is saved. Until then the E2E flow 6 asserts the 'offline' outcome, and flow 7 (offline sync of two logged sets) is not written: it needs the workout screen to log sets.
+
+## 5.2 (waiting on a decision): the unsigned IPA workflow cannot run from a branch yet
+
+`gh workflow run ios-ipa.yml --ref kinetix/p5-ios` returns 404: GitHub dispatches a workflow only when the file is on the default branch. Verifying the IPA and the simulator job needs Phase 5 merged to `main` first (a fast-forward merge, which is a shared-branch action).
+
+Decision needed: merge kinetix/p5-ios to main now so the workflows can run, or keep the branch until 5.4. The workflow files are committed on kinetix/p5-ios (ios-ipa.yml new; ios.yml trimmed: no watch, widget or Garmin steps; device-archive job moved out).
