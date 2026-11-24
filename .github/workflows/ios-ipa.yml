@@ -1,0 +1,54 @@
+# Kinetix: the unsigned IPA for sideloading (Impactor over USB). Runs on demand or for a version tag.
+# The App target only: the watch, widget and Garmin targets are not added here, as the simulator job
+# builds without them too. Signing happens on the phone (Impactor), not in CI.
+name: iOS IPA (unsigned)
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  ipa:
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 26
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - name: Identity check
+        run: node scripts/check-ios-identity.mjs
+        working-directory: frontend
+      # cap sync runs pod install, which clones some pods from GitHub: a dropped connection
+      # there is not a broken build, so it gets two more tries.
+      - name: Phone build (pod install retried)
+        run: for i in 1 2 3; do npm run build:mobile && break; [ "$i" = 3 ] && exit 1; echo "::warning::build:mobile failed, retry $i"; sleep 30; done
+        working-directory: frontend
+      - name: Archive, unsigned
+        working-directory: frontend/ios/App
+        run: |
+          set -o pipefail
+          xcodebuild -workspace App.xcworkspace -scheme App -configuration Release \
+            -destination 'generic/platform=iOS' -archivePath build/App.xcarchive \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" archive \
+            | tee build/archive.log | grep -E "error:|BUILD|ARCHIVE" || true
+          test -d build/App.xcarchive/Products/Applications/App.app
+          cd build/App.xcarchive/Products/Applications
+          # The web assets are put back on the release machine; leave the repo's out of the zip.
+          rm -rf App.app/public/exercise-media
+          mkdir -p ../../../Payload && cp -R App.app ../../../Payload/
+          cd ../../.. && echo "$GITHUB_SHA" > ci-commit.txt && zip -qry Kinetix-unsigned.ipa Payload ci-commit.txt
+          ls -la Kinetix-unsigned.ipa
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: kinetix-unsigned-ipa
+          path: frontend/ios/App/build/Kinetix-unsigned.ipa
+          retention-days: 14
