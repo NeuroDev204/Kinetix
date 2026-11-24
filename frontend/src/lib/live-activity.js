@@ -562,7 +562,8 @@ export function iosMajor (ua) {
 let pluginP = null
 // Inside an object: a Capacitor plugin proxy answers `then` (lib/rest-alert.js, the Coach hang #42).
 const livePlugin = () => pluginP || (pluginP = (async () => {
-  if (!MOBILE || !['ios', 'android'].includes(await nativePlatform())) return null
+  // Kinetix: no Live Activity on iOS (the free team cannot sign the widget); Android keeps its card.
+  if (!MOBILE || (await nativePlatform()) !== 'android') return null
   const { registerPlugin } = await import('@capacitor/core')
   return { LiveActivity: registerPlugin('LiveActivity') }
 })().catch(() => null))
